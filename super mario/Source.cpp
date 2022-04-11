@@ -12,9 +12,7 @@ int main()
 	tx3.loadFromFile("background.png");
 	c.loadFromFile("coins.png");
 	
-	Sprite player(t);
-	Sprite map(tx), map2(tx2), map3(tx3);
-	Sprite coin(c);
+
 
 	player.setPosition(300, 300);
 	player.setTextureRect(IntRect(0 * 233, 0 * 222, 253, 258));
