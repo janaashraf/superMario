@@ -12,7 +12,6 @@ struct player
 	Sprite playersprite;
 	Texture playertex;
 	int playerIndicator = 0;
-
 } mario;
 
 //menu struct
@@ -58,14 +57,13 @@ int main() {
 	settings.settingsSprite.setTexture(settings.settingsTex);
 	settings.settingsSprite.setPosition(760, 10);
 	settings.settingsSprite.setScale(2.5, 2.5);
-	
+
 	//mario music
 	Music music;
 	music.openFromFile("mariomusic.ogg");
-	
 
-	
-
+	//Camera
+	View camera(FloatRect(0, 0, 1200, 700));
 
 	while (window.isOpen())
 	{
@@ -75,12 +73,11 @@ int main() {
 			if (event.type == Event::Closed || Keyboard::isKeyPressed(Keyboard::Escape))
 				window.close();
 		}
-		if (Mouse::isButtonPressed(Mouse::Right)) {
+		if (Mouse::isButtonPressed(Mouse::Left)) {
 			Vector2i pos = Mouse::getPosition(window);
 			checkPos(pos);
-
 		}
-		if (menu.settingsBut == 1 && Mouse::isButtonPressed(Mouse::Right)) {
+		if (menu.settingsBut == 1 && Mouse::isButtonPressed(Mouse::Left)) {
 			Vector2i musicPos = Mouse::getPosition(window);
 			checkMusic(musicPos);
 		}
@@ -91,93 +88,54 @@ int main() {
 			music.pause();
 		}
 
-
-
+		//Moving Right
 		if (Keyboard::isKeyPressed(Keyboard::Right))
 		{
-			if (map.getPosition().x == 0)
+			if (mario.playersprite.getPosition().x < 540 || mario.playersprite.getPosition().x >= 9420 && mario.playersprite.getPosition().x < 9780)
 			{
-				if (mario.playersprite.getPosition().x < 520)
-				{
-					mario.playersprite.move(10, 0);
-					mario.playerIndicator %= 4;
-					mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 2 * 64, 45, 64));
-					mario.playerIndicator++;
-				}
-				else
-				{
-					map.move(-10, 0);
-					mario.playerIndicator++;
-					mario.playerIndicator %= 4;
-					mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 2 * 64, 45, 64));
-				}
+				mario.playersprite.move(10, 0);
+				mario.playerIndicator %= 4;
+				mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 2 * 64, 45, 64));
+				mario.playerIndicator++;
 			}
-			if (map.getPosition().x <0 && map.getPosition().x > -8900)
+			else if (mario.playersprite.getPosition().x == 9780)
+					mario.playersprite.setTextureRect(IntRect(1 * 45, 3 * 64, 45, 64));
+			else
 			{
-				map.move(-10, 0);
+				mario.playersprite.move(10, 0);
+				camera.move(10, 0);
 				mario.playerIndicator++;
 				mario.playerIndicator %= 4;
 				mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 2 * 64, 45, 64));
 			}
-			if (map.getPosition().x == -8900)
-			{
-				if (mario.playersprite.getPosition().x < 880)
-				{
-					mario.playersprite.move(10, 0);
-					mario.playerIndicator %= 4;
-					mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 2 * 64, 45, 64));
-					mario.playerIndicator++;
-				}
-				else
-					mario.playersprite.setTextureRect(IntRect(1 * 45, 2 * 64, 45, 64));
-
-			}
 		}
+		//Moving Left 
 		if (Keyboard::isKeyPressed(Keyboard::Left))
 		{
-			if (map.getPosition().x == 0)
+			if ((mario.playersprite.getPosition().x > 100 && mario.playersprite.getPosition().x <= 540) || (mario.playersprite.getPosition().x <= 9780 && mario.playersprite.getPosition().x > 9420))
 			{
-				if (mario.playersprite.getPosition().x > 100)
-				{
-					mario.playersprite.move(-10, 0);
-					mario.playerIndicator++;
-					mario.playerIndicator %= 4;
-					mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 1 * 64, 45, 64));
-				}
-				if (mario.playersprite.getPosition().x == 100)
-				{
-					mario.playersprite.setTextureRect(IntRect(1 * 45, 1 * 64, 45, 64));
-				}
+				mario.playersprite.move(-10, 0);
+				mario.playerIndicator++;
+				mario.playerIndicator %= 4;
+				mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 1 * 64, 45, 64));
 			}
-			if (map.getPosition().x == -8900)
+			else if (mario.playersprite.getPosition().x == 100)
+				mario.playersprite.setTextureRect(IntRect(1 * 45, 1 * 64, 45, 64));
+			else
 			{
-				if (mario.playersprite.getPosition().x > 580)
-				{
-					mario.playersprite.move(-10, 0);
-					mario.playerIndicator++;
-					mario.playerIndicator %= 4;
-					mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 1 * 64, 45, 64));
-				}
-				if (mario.playersprite.getPosition().x == 580)
-				{
-					map.move(10, 0);
-					mario.playerIndicator++;
-					mario.playerIndicator %= 4;
-					mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 1 * 64, 45, 64));
-				}
-			}
-			if (map.getPosition().x <0 && map.getPosition().x > -8900)
-			{
-				map.move(10, 0);
+				camera.move(-10,0);
+				mario.playersprite.move(-10, 0);
 				mario.playerIndicator++;
 				mario.playerIndicator %= 4;
 				mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 1 * 64, 45, 64));
 			}
 		}
 
+		window.setView(camera);
 		window.clear();
 		window.draw(menu.menuSprite);
 		music.play();
+
 		if (menu.settingsBut == 1 && settings.doneBut == 1) {
 			window.draw(menu.menuSprite);
 		}
@@ -191,8 +149,7 @@ int main() {
 		else if (menu.exitBut == 1) {
 			window.close();
 		}
-		
-		
+
 		window.display();
 	}
 	return 0;
