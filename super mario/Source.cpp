@@ -40,7 +40,6 @@ int main() {
 	mario.playertex.loadFromFile("mario sheet.png");
 	mario.playersprite.setTexture(mario.playertex);
 	mario.playersprite.setTextureRect(IntRect(1 * 45, 2 * 64, 45, 64));
-	mario.playersprite.setPosition(250, 535);
 	mario.playersprite.setScale(1.5, 1.5);
 	mario.playersprite.setPosition(300, 535);
 	//menu
