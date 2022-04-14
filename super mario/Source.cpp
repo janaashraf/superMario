@@ -11,7 +11,7 @@ struct player
 {
 	Sprite playersprite;
 	Texture playertex;
-	int playerIndicator = 0;
+	int playerIndicator = 0, playerDirection = 0;
 } mario;
 
 //menu struct
@@ -91,6 +91,7 @@ int main() {
 		//Moving Right
 		if (Keyboard::isKeyPressed(Keyboard::Right))
 		{
+			mario.playerDirection = 1;
 			if (mario.playersprite.getPosition().x < 540 || mario.playersprite.getPosition().x >= 9420 && mario.playersprite.getPosition().x < 9780)
 			{
 				mario.playersprite.move(10, 0);
@@ -110,8 +111,9 @@ int main() {
 			}
 		}
 		//Moving Left 
-		if (Keyboard::isKeyPressed(Keyboard::Left))
+		else if (Keyboard::isKeyPressed(Keyboard::Left))
 		{
+			mario.playerDirection = -1;
 			if ((mario.playersprite.getPosition().x > 100 && mario.playersprite.getPosition().x <= 540) || (mario.playersprite.getPosition().x <= 9780 && mario.playersprite.getPosition().x > 9420))
 			{
 				mario.playersprite.move(-10, 0);
@@ -130,6 +132,19 @@ int main() {
 				mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 1 * 64, 45, 64));
 			}
 		}
+		else
+		{
+			if (mario.playersprite.getPosition().x == 9780)
+				mario.playersprite.setTextureRect(IntRect(1 * 45, 3 * 64, 45, 64));
+			else
+			{
+				if (mario.playerDirection == 1)
+					mario.playersprite.setTextureRect(IntRect(1 * 45, 2 * 64, 45, 64));
+				else if (mario.playerDirection == -1)
+					mario.playersprite.setTextureRect(IntRect(1 * 45, 1 * 64, 45, 64));
+			}
+		}
+
 
 		window.setView(camera);
 		window.clear();
