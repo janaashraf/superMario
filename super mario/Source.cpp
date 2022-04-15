@@ -1,11 +1,21 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <iostream>
+#include <SFML/System.hpp>
+#include <SFML/window.hpp>
 using namespace sf;
 using namespace std;
+//jump
+bool grounded = false;
+int vy = 0;
+RectangleShape rec1(Vector2f(3300, 100));
+RectangleShape rec2(Vector2f(675, 100));
+RectangleShape rec3(Vector2f(3050, 100));
+RectangleShape rec4(Vector2f(3050, 100));
 
 void checkPos(Vector2i mousepos);
 void checkMusic(Vector2i musicposition);
+bool checkground();
 //player struct
 struct player
 {
@@ -33,7 +43,7 @@ struct settingsMenu
 int main() {
 
 	RenderWindow window(VideoMode(1200, 700), "Super Mario");
-	window.setFramerateLimit(30);
+	window.setFramerateLimit(15);
 
 	//mario character
 	mario.playertex.loadFromFile("mario sheet.png");
@@ -41,6 +51,12 @@ int main() {
 	mario.playersprite.setTextureRect(IntRect(1 * 45, 2 * 64, 45, 64));
 	mario.playersprite.setScale(1.5, 1.5);
 	mario.playersprite.setPosition(300, 535);
+	//jump
+	rec1.setPosition(0, 630);
+	rec2.setPosition(3430, 630);
+	rec3.setPosition(4285, 630);
+	rec4.setPosition(7450, 630);
+
 	//menu
 	menu.menutex.loadFromFile("menu mario2.png");
 	menu.menuSprite.setTexture(menu.menutex);
@@ -91,45 +107,49 @@ int main() {
 		//Moving Right
 		if (Keyboard::isKeyPressed(Keyboard::Right))
 		{
-			mario.playerDirection = 1;
-			if (mario.playersprite.getPosition().x < 540 || mario.playersprite.getPosition().x >= 9420 && mario.playersprite.getPosition().x < 9780)
-			{
-				mario.playersprite.move(10, 0);
-				mario.playerIndicator %= 4;
-				mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 2 * 64, 45, 64));
-				mario.playerIndicator++;
-			}
-			else if (mario.playersprite.getPosition().x == 9780)
+			if (mario.playersprite.getPosition().y < 580) {
+				mario.playerDirection = 1;
+				if (mario.playersprite.getPosition().x < 540 || mario.playersprite.getPosition().x >= 9420 && mario.playersprite.getPosition().x < 9780)
+				{
+					mario.playersprite.move(15, 0);
+					mario.playerIndicator %= 4;
+					mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 2 * 64, 45, 64));
+					mario.playerIndicator++;
+				}
+				else if (mario.playersprite.getPosition().x == 9780)
 					mario.playersprite.setTextureRect(IntRect(1 * 45, 3 * 64, 45, 64));
-			else
-			{
-				mario.playersprite.move(10, 0);
-				camera.move(10, 0);
-				mario.playerIndicator++;
-				mario.playerIndicator %= 4;
-				mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 2 * 64, 45, 64));
+				else
+				{
+					mario.playersprite.move(15, 0);
+					camera.move(15, 0);
+					mario.playerIndicator++;
+					mario.playerIndicator %= 4;
+					mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 2 * 64, 45, 64));
+				}
 			}
 		}
 		//Moving Left 
 		else if (Keyboard::isKeyPressed(Keyboard::Left))
 		{
-			mario.playerDirection = -1;
-			if ((mario.playersprite.getPosition().x > 100 && mario.playersprite.getPosition().x <= 540) || (mario.playersprite.getPosition().x <= 9780 && mario.playersprite.getPosition().x > 9420))
-			{
-				mario.playersprite.move(-10, 0);
-				mario.playerIndicator++;
-				mario.playerIndicator %= 4;
-				mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 1 * 64, 45, 64));
-			}
-			else if (mario.playersprite.getPosition().x == 100)
-				mario.playersprite.setTextureRect(IntRect(1 * 45, 1 * 64, 45, 64));
-			else
-			{
-				camera.move(-10,0);
-				mario.playersprite.move(-10, 0);
-				mario.playerIndicator++;
-				mario.playerIndicator %= 4;
-				mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 1 * 64, 45, 64));
+			if (mario.playersprite.getPosition().y < 580) {
+				mario.playerDirection = -1;
+				if ((mario.playersprite.getPosition().x > 100 && mario.playersprite.getPosition().x <= 540) || (mario.playersprite.getPosition().x <= 9780 && mario.playersprite.getPosition().x > 9420))
+				{
+					mario.playersprite.move(-15, 0);
+					mario.playerIndicator++;
+					mario.playerIndicator %= 4;
+					mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 1 * 64, 45, 64));
+				}
+				else if (mario.playersprite.getPosition().x == 100)
+					mario.playersprite.setTextureRect(IntRect(1 * 45, 1 * 64, 45, 64));
+				else
+				{
+					camera.move(-15, 0);
+					mario.playersprite.move(-15, 0);
+					mario.playerIndicator++;
+					mario.playerIndicator %= 4;
+					mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 1 * 64, 45, 64));
+				}
 			}
 		}
 		else
@@ -144,6 +164,18 @@ int main() {
 					mario.playersprite.setTextureRect(IntRect(1 * 45, 1 * 64, 45, 64));
 			}
 		}
+		//jump
+		if (checkground()){
+			grounded = true;
+			vy = 0;
+			if (Keyboard::isKeyPressed(Keyboard::Space)) {
+				vy = 35;
+			}
+		}
+		else {
+			grounded = false;
+			vy -= 5;
+		}
 
 
 		window.setView(camera);
@@ -157,6 +189,9 @@ int main() {
 		if (menu.startBut == 1) {
 			window.draw(map);
 			window.draw(mario.playersprite);
+			
+			mario.playersprite.move(0, -vy);
+
 		}
 		else if (menu.settingsBut == 1) {
 			window.draw(settings.settingsSprite);
@@ -197,4 +232,16 @@ void checkMusic(Vector2i musicposition) {
 	else if (musicposition.x >= 100 && musicposition.x <= 1000 && musicposition.y >= 0 && musicposition.y <= 800) {
 		settings.doneBut = 1;
 	}
+}
+bool checkground() {
+	if (mario.playersprite.getGlobalBounds().intersects(rec1.getGlobalBounds()))
+		return 1;
+	else if (mario.playersprite.getGlobalBounds().intersects(rec2.getGlobalBounds()))
+		return 1;
+	else if (mario.playersprite.getGlobalBounds().intersects(rec3.getGlobalBounds()))
+		return 1;
+	else if (mario.playersprite.getGlobalBounds().intersects(rec4.getGlobalBounds()))
+		return 1;
+	else
+		return 0;
 }
