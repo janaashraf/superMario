@@ -131,7 +131,7 @@ int main() {
 		//Moving Left 
 		else if (Keyboard::isKeyPressed(Keyboard::Left))
 		{
-			if (mario.playersprite.getPosition().y < 580) {
+			if (checkground()) {
 				mario.playerDirection = -1;
 				if ((mario.playersprite.getPosition().x > 100 && mario.playersprite.getPosition().x <= 540) || (mario.playersprite.getPosition().x <= 9780 && mario.playersprite.getPosition().x > 9420))
 				{
@@ -140,15 +140,17 @@ int main() {
 					mario.playerIndicator %= 4;
 					mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 1 * 64, 45, 64));
 				}
-				else if (mario.playersprite.getPosition().x == 100)
+				else if (mario.playersprite.getPosition().x <= 100)
 					mario.playersprite.setTextureRect(IntRect(1 * 45, 1 * 64, 45, 64));
 				else
 				{
-					camera.move(-15, 0);
-					mario.playersprite.move(-15, 0);
 					mario.playerIndicator++;
 					mario.playerIndicator %= 4;
 					mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 1 * 64, 45, 64));
+						camera.move(-15, 0);
+						mario.playersprite.move(-15, 0);
+					
+					
 				}
 			}
 		}
