@@ -131,7 +131,7 @@ int main() {
 		//Moving Left 
 		else if (Keyboard::isKeyPressed(Keyboard::Left))
 		{
-			if (checkground()) {
+			if (mario.playersprite.getPosition().y < 580) {
 				mario.playerDirection = -1;
 				if ((mario.playersprite.getPosition().x > 100 && mario.playersprite.getPosition().x <= 540) || (mario.playersprite.getPosition().x <= 9780 && mario.playersprite.getPosition().x > 9420))
 				{
