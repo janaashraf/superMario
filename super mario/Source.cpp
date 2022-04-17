@@ -39,6 +39,12 @@ struct settingsMenu
 	Texture settingsTex;
 	int muteBut = 1, doneBut = 0;
 } settings;
+// coins struct
+struct marioCoin {
+	Sprite coinSprite;
+	Texture coinTex;
+	int coinIndicator = 0;
+} coins[100];
 //main function
 int main() {
 
@@ -56,6 +62,59 @@ int main() {
 	rec2.setPosition(3430, 630);
 	rec3.setPosition(4285, 630);
 	rec4.setPosition(7450, 630);
+	//coin collision sound
+	SoundBuffer buffer;
+	buffer.loadFromFile("mariocoin.ogg");
+	Sound sound;
+	sound.setBuffer(buffer);
+	// coins 
+
+	coins->coinTex.loadFromFile("coinss.png");
+	for (int i = 0; i < 100; i++) {
+		coins[i].coinSprite.setTexture(coins->coinTex);
+		coins[i].coinSprite.setTextureRect(IntRect(0, 0, 192, 171));
+
+
+		if (i >= 0 && i <= 3)
+			coins[i].coinSprite.setPosition(350 + (i * 100), 580);
+
+		else if (i >= 4 && i <= 6)
+			coins[i].coinSprite.setPosition(950 + ((i - 4) * 100), 390);
+		else if (i >= 7 && i <= 11)
+			coins[i].coinSprite.setPosition(1500 + ((i - 7) * 100), 580);
+		else if (i >= 12 && i <= 17)
+			coins[i].coinSprite.setPosition(2400 + ((i - 12) * 100), 580);
+		else if (i >= 18 && i <= 20)
+			coins[i].coinSprite.setPosition(3000 + ((i - 18) * 100), 580);
+		else if (i >= 21 && i <= 22)
+			coins[i].coinSprite.setPosition(3700 + ((i - 21) * 100), 390);
+		else if (i >= 23 && i <= 28)
+			coins[i].coinSprite.setPosition(3830 + ((i - 23) * 70), 200);
+		else if (i >= 29 && i <= 31)
+			coins[i].coinSprite.setPosition(4370 + ((i - 29) * 70), 200);
+		else if (i == 32)
+			coins[i].coinSprite.setPosition(4520, 390);
+		else if (i >= 33 && i <= 34)
+			coins[i].coinSprite.setPosition(4800 + ((i - 33) * 60), 390);
+		else if (i >= 35 && i <= 37)
+			coins[i].coinSprite.setPosition(5000 + ((i - 35) * 100), 580);
+		else if (i == 38)
+			coins[i].coinSprite.setPosition(5670, 390);
+		else if (i >= 39 && i <= 41)
+			coins[i].coinSprite.setPosition(5800 + ((i - 39) * 60), 200);
+		else if (i >= 42 && i <= 43)
+			coins[i].coinSprite.setPosition(6150 + ((i - 42) * 120), 200);
+		else if (i >= 44 && i <= 45)
+			coins[i].coinSprite.setPosition(6200 + ((i - 44) * 60), 390);
+		else if (i >= 46 && i <= 48)
+			coins[i].coinSprite.setPosition(6900 + ((i - 46) * 60), 580);
+		else if (i >= 49 && i <= 50)
+			coins[i].coinSprite.setPosition(8050 + ((i - 49) * 60), 390);
+		else if (i == 51)
+			coins[i].coinSprite.setPosition(8200, 390);
+		coins[i].coinSprite.setScale(0.2, 0.2);
+	}
+
 
 	//menu
 	menu.menutex.loadFromFile("menu mario2.png");
@@ -147,10 +206,10 @@ int main() {
 					mario.playerIndicator++;
 					mario.playerIndicator %= 4;
 					mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 1 * 64, 45, 64));
-						camera.move(-15, 0);
-						mario.playersprite.move(-15, 0);
-					
-					
+					camera.move(-15, 0);
+					mario.playersprite.move(-15, 0);
+
+
 				}
 			}
 		}
@@ -167,7 +226,7 @@ int main() {
 			}
 		}
 		//jump
-		if (checkground()){
+		if (checkground()) {
 			grounded = true;
 			vy = 0;
 			if (Keyboard::isKeyPressed(Keyboard::Space)) {
@@ -178,7 +237,20 @@ int main() {
 			grounded = false;
 			vy -= 5;
 		}
+		//coin animation
+		for (int i = 0; i < 100; i++) {
+			coins[i].coinSprite.setTextureRect(IntRect(coins->coinIndicator * 192, 0, 192, 171));
+		}
+		// collision with coins
+		for (int i = 0; i < 100; i++) {
+			if (mario.playersprite.getGlobalBounds().intersects(coins[i].coinSprite.getGlobalBounds())) {
+				coins[i].coinSprite.setScale(0, 0);
+				sound.play();
 
+			}
+		}
+		coins->coinIndicator++;
+		coins->coinIndicator %= 6;
 
 		window.setView(camera);
 		window.clear();
@@ -191,7 +263,11 @@ int main() {
 		if (menu.startBut == 1) {
 			window.draw(map);
 			window.draw(mario.playersprite);
-			
+			for (int i = 0; i < 100; i++) {
+				if (coins[i].coinSprite.getPosition().x != 0 && coins[i].coinSprite.getPosition().y != 0) {
+					window.draw(coins[i].coinSprite);
+				}
+			}
 			mario.playersprite.move(0, -vy);
 
 		}
