@@ -23,7 +23,17 @@ struct player
 	Texture playertex;
 	int playerIndicator = 0, playerDirection = 0;
 } mario;
-
+//enemy struct
+struct enemies
+{
+	Sprite enemySprite;
+	Texture enemytex;
+} enemy[12];
+//enemy top struct
+struct top
+{
+	RectangleShape enemytop;
+} enemycollision[24]; 
 //menu struct
 struct gameMenu
 {
@@ -60,12 +70,104 @@ int main() {
 	text.setString("score : " + to_string(score));
 	text.setPosition(30, 15);
 	text.setCharacterSize(20);
+	//gameover text
+	Text gameOver;
+	Font gameOverFont;
+	gameOverFont.loadFromFile("PressStart2P-Regular.ttf");
+	gameOver.setFont(gameOverFont);
+	gameOver.setCharacterSize(100);
+	bool dead = false;
+	gameOver.setString("GAME OVER!");
+	gameOver.setFillColor(Color::Black);
+
 	//mario character
 	mario.playertex.loadFromFile("mario sheet.png");
 	mario.playersprite.setTexture(mario.playertex);
 	mario.playersprite.setTextureRect(IntRect(1 * 45, 2 * 64, 45, 64));
 	mario.playersprite.setScale(1.5, 1.5);
 	mario.playersprite.setPosition(300, 535);
+	//enemy character
+	int checkbarrier1= 1;
+	int checkbarrier2 = 1;
+	int checkbarrier3 = 1;
+	bool enemystate[12] = { };
+	RectangleShape barrier1(Vector2f(100, 100));
+	RectangleShape barrier2(Vector2f(250, 100));
+	RectangleShape barrier3(Vector2f(150, 100));
+	RectangleShape barrier4(Vector2f(150, 100));
+	barrier1.setPosition(3320, 585);
+	barrier2.setPosition(4100, 585);
+	barrier3.setPosition(7300, 585);
+	barrier4.setPosition(8300, 585);
+	for (int i = 0; i < 12; i++) {
+		enemy[i].enemytex.loadFromFile("enemy.png");
+		enemy[i].enemySprite.setTexture(enemy[i].enemytex);
+		enemy[i].enemySprite.setTextureRect(IntRect(0 * 193.666, 0, 193.666, 161));
+		enemy[i].enemySprite.setScale(0.25, 0.25);
+		enemycollision[i].enemytop.setSize(Vector2f(2,8));
+		enemycollision[2*i].enemytop.setSize(Vector2f(2, 8));
+
+		if (i == 0) {
+			enemy[i].enemySprite.setPosition(1300, 585);
+			enemycollision[2*i].enemytop.setPosition(1305, 610);
+			enemycollision[2*i+1].enemytop.setPosition(1345, 610);
+		}
+		else if (i == 1) {
+			enemy[i].enemySprite.setPosition(2100, 585);
+			enemycollision[2*i].enemytop.setPosition(2105, 610);
+			enemycollision[2 * i + 1].enemytop.setPosition(2145, 610);
+		}
+		else if (i == 2) {
+			enemy[i].enemySprite.setPosition(2500, 585);
+			enemycollision[2 * i].enemytop.setPosition(2505, 610);
+			enemycollision[2 * i + 1].enemytop.setPosition(2545, 610);
+		}
+		else if (i == 3) {
+			enemy[i].enemySprite.setPosition(3200, 585);
+			enemycollision[2 * i].enemytop.setPosition(3205, 605);
+			enemycollision[2 * i + 1].enemytop.setPosition(3245, 605);
+		}
+		else if (i == 4) {
+			enemy[i].enemySprite.setPosition(3900, 585);
+			enemycollision[2 * i].enemytop.setPosition(3905, 605);
+			enemycollision[2 * i + 1].enemytop.setPosition(3945, 605);
+		}
+		else if (i == 5) {
+			enemy[i].enemySprite.setPosition(4600, 585);
+			enemycollision[2 * i].enemytop.setPosition(4605, 605);
+			enemycollision[2 * i + 1].enemytop.setPosition(4645, 605);
+		}
+		else if (i == 6) {
+			enemy[i].enemySprite.setPosition(5600, 585);
+			enemycollision[2 * i].enemytop.setPosition(5605, 605);
+			enemycollision[2 * i + 1].enemytop.setPosition(5645, 605);
+		}
+		else if (i == 7) {
+			enemy[i].enemySprite.setPosition(6200, 585);
+			enemycollision[2 * i].enemytop.setPosition(6205, 605);
+			enemycollision[2 * i + 1].enemytop.setPosition(6245, 605);
+		}
+		else if (i == 8) {
+			enemy[i].enemySprite.setPosition(6300, 585);
+			enemycollision[2 * i].enemytop.setPosition(6305, 605);
+			enemycollision[2 * i + 1].enemytop.setPosition(6345, 605);
+		}
+		else if (i == 9) {
+			enemy[i].enemySprite.setPosition(6900, 585);
+			enemycollision[2 * i].enemytop.setPosition(6905, 605);
+			enemycollision[2 * i + 1].enemytop.setPosition(6945, 605);
+		}
+		else if (i == 10) {
+			enemy[i].enemySprite.setPosition(7500, 585);
+			enemycollision[2 * i].enemytop.setPosition(7505, 605);
+			enemycollision[2 * i + 1].enemytop.setPosition(7545, 605);
+		}
+		else if (i == 11) {
+			enemy[i].enemySprite.setPosition(7600, 585);
+			enemycollision[2 * i].enemytop.setPosition(7605, 605);
+			enemycollision[2 * i + 1].enemytop.setPosition(7645, 605);
+		}
+	}
 	//jump
 	rec1.setPosition(0, 630);
 	rec2.setPosition(3430, 630);
@@ -175,7 +277,7 @@ int main() {
 		//Moving Right
 		if (Keyboard::isKeyPressed(Keyboard::Right))
 		{
-			if (mario.playersprite.getPosition().y < 580) {
+			if (mario.playersprite.getPosition().y < 580 && !dead) {
 				mario.playerDirection = 1;
 				if (mario.playersprite.getPosition().x < 540 || mario.playersprite.getPosition().x >= 9420 && mario.playersprite.getPosition().x < 9780)
 				{
@@ -200,7 +302,7 @@ int main() {
 		//Moving Left 
 		else if (Keyboard::isKeyPressed(Keyboard::Left))
 		{
-			if (mario.playersprite.getPosition().y < 580) {
+			if (mario.playersprite.getPosition().y < 580 && !dead) {
 				mario.playerDirection = -1;
 				if ((mario.playersprite.getPosition().x > 100 && mario.playersprite.getPosition().x <= 540) || (mario.playersprite.getPosition().x <= 9780 && mario.playersprite.getPosition().x > 9420))
 				{
@@ -236,6 +338,84 @@ int main() {
 					mario.playersprite.setTextureRect(IntRect(1 * 45, 1 * 64, 45, 64));
 			}
 		}
+		//enemy moving
+		for (int i = 0; i < 12; i++) {
+			if (i == 4 && !enemystate[i]) {
+				if (enemy[i].enemySprite.getGlobalBounds().intersects(barrier1.getGlobalBounds())) {
+					checkbarrier1 = 0;
+				}
+				else if(enemy[i].enemySprite.getGlobalBounds().intersects(barrier2.getGlobalBounds())) {
+					checkbarrier1= 1;
+				}
+				if (checkbarrier1 == 1) {
+					enemy[i].enemySprite.move(-3, 0);
+					enemycollision[2*i].enemytop.move(-3, 0);
+					enemycollision[2 * i + 1].enemytop.move(-3, 0);
+				}
+				else {
+					enemy[i].enemySprite.move(3, 0);
+					enemycollision[2*i].enemytop.move(3, 0);
+					enemycollision[2 * i + 1].enemytop.move(3, 0);
+				}
+			}
+			else if (i > 4 && i < 10 && !enemystate[i]) {
+				if (enemy[i].enemySprite.getGlobalBounds().intersects(barrier2.getGlobalBounds()))
+					checkbarrier2 = 0;
+				else if (enemy[i].enemySprite.getGlobalBounds().intersects(barrier3.getGlobalBounds()))
+					checkbarrier2 = 1;
+				if (checkbarrier2 == 1) {
+					enemy[i].enemySprite.move(-3, 0);
+					enemycollision[2*i].enemytop.move(-3, 0);
+					enemycollision[2 * i + 1].enemytop.move(-3, 0);
+				}
+				else {
+					enemy[i].enemySprite.move(3, 0);
+					enemycollision[2*i].enemytop.move(3, 0);
+					enemycollision[2 * i + 1].enemytop.move(3, 0);
+				}
+			}
+			else if (i > 9 && i < 12 && !enemystate[i])
+			{
+				if (enemy[i].enemySprite.getGlobalBounds().intersects(barrier3.getGlobalBounds()))
+					checkbarrier3 = 0;
+				else if (enemy[i].enemySprite.getGlobalBounds().intersects(barrier4.getGlobalBounds()))
+					checkbarrier3 = 1;
+				if (checkbarrier3 == 1) {
+					enemy[i].enemySprite.move(-3, 0);
+					enemycollision[2*i].enemytop.move(-3, 0);
+					enemycollision[2 * i + 1].enemytop.move(-3, 0);
+				}
+				else {
+					enemy[i].enemySprite.move(3, 0);
+					enemycollision[2*i].enemytop.move(3, 0);
+					enemycollision[2 * i + 1].enemytop.move(3, 0);
+				}
+			}
+			else {
+				enemy[i].enemySprite.move(-3, 0);
+				enemycollision[2*i].enemytop.move(-3, 0);
+				enemycollision[2*i+1].enemytop.move(-3, 0);
+			}
+		}
+		//collision with enemies
+		for (int i = 0; i < 12; i++) {
+			if (enemy[i].enemySprite.getGlobalBounds().intersects(mario.playersprite.getGlobalBounds()) && vy < 0) {
+				enemy[i].enemySprite.setTextureRect(IntRect(1 * 193.666, 0, 193.666, 161));
+				enemystate[i] = true;
+				text.setString("score : " + to_string(score));
+				score++;
+				sound.play();
+			}
+	
+			else if ((mario.playersprite.getGlobalBounds().intersects(enemycollision[2 * i].enemytop.getGlobalBounds()) || mario.playersprite.getGlobalBounds().intersects(enemycollision[2 * i + 1].enemytop.getGlobalBounds())) && !enemystate[i]) {
+				dead = true;
+				mario.playersprite.move(0, 0);
+				gameOver.setPosition(mario.playersprite.getPosition().x - 450, mario.playersprite.getPosition().y - 100);
+				mario.playersprite.setScale(0, 0);
+			}
+		}
+
+		
 		//jump
 		if (checkground()) {
 			grounded = true;
@@ -248,6 +428,12 @@ int main() {
 			grounded = false;
 			vy -= 5;
 		}
+		//gameover check
+		if (mario.playersprite.getPosition().y > 580) {
+			dead = true;
+			gameOver.setPosition(text.getPosition().x + 100, text.getPosition().y + 200);
+		}
+
 		//coin animation
 		for (int i = 0; i < 100; i++) {
 			coins[i].coinSprite.setTextureRect(IntRect(coins->coinIndicator * 192, 0, 192, 171));
@@ -277,12 +463,17 @@ int main() {
 			window.draw(map);
 			window.draw(mario.playersprite);
 			window.draw(text);
+			for (int i = 0; i < 12; i++) {
+				window.draw(enemy[i].enemySprite);
+			}
 			for (int i = 0; i < 100; i++) {
 				if (coins[i].coinSprite.getPosition().x != 0 && coins[i].coinSprite.getPosition().y != 0) {
 					window.draw(coins[i].coinSprite);
 				}
 			}
 			mario.playersprite.move(0, -vy);
+			if (dead)
+				window.draw(gameOver);
 
 		}
 		else if (menu.settingsBut == 1) {
