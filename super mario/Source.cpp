@@ -50,7 +50,16 @@ int main() {
 
 	RenderWindow window(VideoMode(1200, 700), "Super Mario");
 	window.setFramerateLimit(15);
-
+	//score text
+	int score = 0;
+	Font font;
+	font.loadFromFile("PressStart2P-Regular.ttf");
+	Text text;
+	text.setFont(font);
+	text.setFillColor(Color::Black);
+	text.setString("score : " + to_string(score));
+	text.setPosition(30, 15);
+	text.setCharacterSize(20);
 	//mario character
 	mario.playertex.loadFromFile("mario sheet.png");
 	mario.playersprite.setTexture(mario.playertex);
@@ -181,6 +190,7 @@ int main() {
 				{
 					mario.playersprite.move(15, 0);
 					camera.move(15, 0);
+					text.move(15, 0);
 					mario.playerIndicator++;
 					mario.playerIndicator %= 4;
 					mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 2 * 64, 45, 64));
@@ -207,6 +217,7 @@ int main() {
 					mario.playerIndicator %= 4;
 					mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 1 * 64, 45, 64));
 					camera.move(-15, 0);
+					text.move(-15, 0);
 					mario.playersprite.move(-15, 0);
 
 
@@ -245,6 +256,8 @@ int main() {
 		for (int i = 0; i < 100; i++) {
 			if (mario.playersprite.getGlobalBounds().intersects(coins[i].coinSprite.getGlobalBounds())) {
 				coins[i].coinSprite.setScale(0, 0);
+				text.setString("score : " + to_string(score));
+				score++;
 				sound.play();
 
 			}
@@ -263,6 +276,7 @@ int main() {
 		if (menu.startBut == 1) {
 			window.draw(map);
 			window.draw(mario.playersprite);
+			window.draw(text);
 			for (int i = 0; i < 100; i++) {
 				if (coins[i].coinSprite.getPosition().x != 0 && coins[i].coinSprite.getPosition().y != 0) {
 					window.draw(coins[i].coinSprite);
