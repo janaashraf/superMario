@@ -232,7 +232,7 @@ int main() {
 	mapTex.loadFromFile("NES - Super Mario Bros - World 1-1.png");
 	map.setTexture(mapTex);
 	map.setScale(3, 3);
-	
+
 	//mario music
 	Music music;
 	music.openFromFile("mariomusic.ogg");
@@ -252,7 +252,7 @@ int main() {
 			Vector2i pos = Mouse::getPosition(window);
 			checkPos(pos);
 		}
-		
+
 		//Moving Right
 		if (Keyboard::isKeyPressed(Keyboard::Right))
 		{
@@ -384,6 +384,7 @@ int main() {
 				text.setString("score : " + to_string(score));
 				score++;
 				sound.play();
+				vy = 0;
 			}
 
 			else if ((mario.playersprite.getGlobalBounds().intersects(enemycollision[2 * i].enemytop.getGlobalBounds()) || mario.playersprite.getGlobalBounds().intersects(enemycollision[2 * i + 1].enemytop.getGlobalBounds())) && !enemystate[i]) {
@@ -437,7 +438,7 @@ int main() {
 		window.draw(menu.menuSprite);
 		music.play();
 
-		
+
 		if (menu.startBut == 1) {
 			window.draw(map);
 			window.draw(mario.playersprite);
@@ -455,7 +456,7 @@ int main() {
 				window.draw(gameOver);
 
 		}
-		
+
 		else if (menu.exitBut == 1) {
 			window.close();
 		}
@@ -470,7 +471,7 @@ void checkPos(Vector2i mousepos) {
 	if (mousepos.x >= 470 && mousepos.x <= 730 && mousepos.y >= 330 && mousepos.y <= 430) {
 		menu.startBut = 1;
 	}
-	
+
 	// to exit
 	else if (mousepos.x >= 465 && mousepos.x <= 735 && mousepos.y >= 431 && mousepos.y <= 540) {
 		menu.exitBut = 1;
