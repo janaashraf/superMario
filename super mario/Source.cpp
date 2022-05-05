@@ -14,7 +14,7 @@ RectangleShape rec3(Vector2f(3050, 100));
 RectangleShape rec4(Vector2f(3050, 100));
 
 void checkPos(Vector2i mousepos);
-void checkMusic(Vector2i musicposition);
+
 bool checkground();
 //player struct
 struct player
@@ -33,22 +33,16 @@ struct enemies
 struct top
 {
 	RectangleShape enemytop;
-} enemycollision[24]; 
+} enemycollision[24];
 //menu struct
 struct gameMenu
 {
 	Sprite menuSprite;
 	Texture menutex;
-	int startBut = 0, settingsBut = 0, exitBut = 0;
+	int startBut = 0, exitBut = 0;
 }menu;
 
-// settings menu struct
-struct settingsMenu
-{
-	Sprite settingsSprite;
-	Texture settingsTex;
-	int muteBut = 1, doneBut = 0;
-} settings;
+
 // coins struct
 struct marioCoin {
 	Sprite coinSprite;
@@ -87,7 +81,7 @@ int main() {
 	mario.playersprite.setScale(1.5, 1.5);
 	mario.playersprite.setPosition(300, 535);
 	//enemy character
-	int checkbarrier1= 1;
+	int checkbarrier1 = 1;
 	int checkbarrier2 = 1;
 	int checkbarrier3 = 1;
 	bool enemystate[12] = { };
@@ -104,17 +98,17 @@ int main() {
 		enemy[i].enemySprite.setTexture(enemy[i].enemytex);
 		enemy[i].enemySprite.setTextureRect(IntRect(0 * 193.666, 0, 193.666, 161));
 		enemy[i].enemySprite.setScale(0.25, 0.25);
-		enemycollision[i].enemytop.setSize(Vector2f(2,8));
-		enemycollision[2*i].enemytop.setSize(Vector2f(2, 8));
+		enemycollision[i].enemytop.setSize(Vector2f(2, 8));
+		enemycollision[2 * i].enemytop.setSize(Vector2f(2, 8));
 
 		if (i == 0) {
 			enemy[i].enemySprite.setPosition(1300, 585);
-			enemycollision[2*i].enemytop.setPosition(1305, 610);
-			enemycollision[2*i+1].enemytop.setPosition(1345, 610);
+			enemycollision[2 * i].enemytop.setPosition(1305, 610);
+			enemycollision[2 * i + 1].enemytop.setPosition(1345, 610);
 		}
 		else if (i == 1) {
 			enemy[i].enemySprite.setPosition(2100, 585);
-			enemycollision[2*i].enemytop.setPosition(2105, 610);
+			enemycollision[2 * i].enemytop.setPosition(2105, 610);
 			enemycollision[2 * i + 1].enemytop.setPosition(2145, 610);
 		}
 		else if (i == 2) {
@@ -228,7 +222,7 @@ int main() {
 
 
 	//menu
-	menu.menutex.loadFromFile("menu mario2.png");
+	menu.menutex.loadFromFile("menu mario 3.png");
 	menu.menuSprite.setTexture(menu.menutex);
 	menu.menuSprite.setPosition(-20, -10);
 	menu.menuSprite.setScale(1.6, 1.5);
@@ -238,12 +232,7 @@ int main() {
 	mapTex.loadFromFile("NES - Super Mario Bros - World 1-1.png");
 	map.setTexture(mapTex);
 	map.setScale(3, 3);
-	//settings menu
-	settings.settingsTex.loadFromFile("setting 11.png");
-	settings.settingsSprite.setTexture(settings.settingsTex);
-	settings.settingsSprite.setPosition(760, 10);
-	settings.settingsSprite.setScale(2.5, 2.5);
-
+	
 	//mario music
 	Music music;
 	music.openFromFile("mariomusic.ogg");
@@ -263,17 +252,7 @@ int main() {
 			Vector2i pos = Mouse::getPosition(window);
 			checkPos(pos);
 		}
-		if (menu.settingsBut == 1 && Mouse::isButtonPressed(Mouse::Left)) {
-			Vector2i musicPos = Mouse::getPosition(window);
-			checkMusic(musicPos);
-		}
-		if (settings.muteBut == 0) {
-			music.play();
-		}
-		else if (settings.muteBut == 1) {
-			music.pause();
-		}
-
+		
 		//Moving Right
 		if (Keyboard::isKeyPressed(Keyboard::Right))
 		{
@@ -344,17 +323,17 @@ int main() {
 				if (enemy[i].enemySprite.getGlobalBounds().intersects(barrier1.getGlobalBounds())) {
 					checkbarrier1 = 0;
 				}
-				else if(enemy[i].enemySprite.getGlobalBounds().intersects(barrier2.getGlobalBounds())) {
-					checkbarrier1= 1;
+				else if (enemy[i].enemySprite.getGlobalBounds().intersects(barrier2.getGlobalBounds())) {
+					checkbarrier1 = 1;
 				}
 				if (checkbarrier1 == 1) {
 					enemy[i].enemySprite.move(-3, 0);
-					enemycollision[2*i].enemytop.move(-3, 0);
+					enemycollision[2 * i].enemytop.move(-3, 0);
 					enemycollision[2 * i + 1].enemytop.move(-3, 0);
 				}
 				else {
 					enemy[i].enemySprite.move(3, 0);
-					enemycollision[2*i].enemytop.move(3, 0);
+					enemycollision[2 * i].enemytop.move(3, 0);
 					enemycollision[2 * i + 1].enemytop.move(3, 0);
 				}
 			}
@@ -365,12 +344,12 @@ int main() {
 					checkbarrier2 = 1;
 				if (checkbarrier2 == 1) {
 					enemy[i].enemySprite.move(-3, 0);
-					enemycollision[2*i].enemytop.move(-3, 0);
+					enemycollision[2 * i].enemytop.move(-3, 0);
 					enemycollision[2 * i + 1].enemytop.move(-3, 0);
 				}
 				else {
 					enemy[i].enemySprite.move(3, 0);
-					enemycollision[2*i].enemytop.move(3, 0);
+					enemycollision[2 * i].enemytop.move(3, 0);
 					enemycollision[2 * i + 1].enemytop.move(3, 0);
 				}
 			}
@@ -382,19 +361,19 @@ int main() {
 					checkbarrier3 = 1;
 				if (checkbarrier3 == 1) {
 					enemy[i].enemySprite.move(-3, 0);
-					enemycollision[2*i].enemytop.move(-3, 0);
+					enemycollision[2 * i].enemytop.move(-3, 0);
 					enemycollision[2 * i + 1].enemytop.move(-3, 0);
 				}
 				else {
 					enemy[i].enemySprite.move(3, 0);
-					enemycollision[2*i].enemytop.move(3, 0);
+					enemycollision[2 * i].enemytop.move(3, 0);
 					enemycollision[2 * i + 1].enemytop.move(3, 0);
 				}
 			}
 			else {
 				enemy[i].enemySprite.move(-3, 0);
-				enemycollision[2*i].enemytop.move(-3, 0);
-				enemycollision[2*i+1].enemytop.move(-3, 0);
+				enemycollision[2 * i].enemytop.move(-3, 0);
+				enemycollision[2 * i + 1].enemytop.move(-3, 0);
 			}
 		}
 		//collision with enemies
@@ -406,7 +385,7 @@ int main() {
 				score++;
 				sound.play();
 			}
-	
+
 			else if ((mario.playersprite.getGlobalBounds().intersects(enemycollision[2 * i].enemytop.getGlobalBounds()) || mario.playersprite.getGlobalBounds().intersects(enemycollision[2 * i + 1].enemytop.getGlobalBounds())) && !enemystate[i]) {
 				dead = true;
 				mario.playersprite.move(0, 0);
@@ -415,7 +394,7 @@ int main() {
 			}
 		}
 
-		
+
 		//jump
 		if (checkground()) {
 			grounded = true;
@@ -444,7 +423,9 @@ int main() {
 				coins[i].coinSprite.setScale(0, 0);
 				text.setString("score : " + to_string(score));
 				score++;
-				sound.play();
+				if (menu.startBut == 1) {
+					sound.play();
+				}
 
 			}
 		}
@@ -456,9 +437,7 @@ int main() {
 		window.draw(menu.menuSprite);
 		music.play();
 
-		if (menu.settingsBut == 1 && settings.doneBut == 1) {
-			window.draw(menu.menuSprite);
-		}
+		
 		if (menu.startBut == 1) {
 			window.draw(map);
 			window.draw(mario.playersprite);
@@ -476,9 +455,7 @@ int main() {
 				window.draw(gameOver);
 
 		}
-		else if (menu.settingsBut == 1) {
-			window.draw(settings.settingsSprite);
-		}
+		
 		else if (menu.exitBut == 1) {
 			window.close();
 		}
@@ -490,32 +467,16 @@ int main() {
 //to check mouse position in menu
 void checkPos(Vector2i mousepos) {
 	// to press start
-	if (mousepos.x >= 426 && mousepos.x <= 770 && mousepos.y >= 270 && mousepos.y <= 405) {
+	if (mousepos.x >= 470 && mousepos.x <= 730 && mousepos.y >= 330 && mousepos.y <= 430) {
 		menu.startBut = 1;
 	}
-	// to open settings	
-	else if (mousepos.x >= 427 && mousepos.x <= 760 && mousepos.y >= 410 && mousepos.y <= 533) {
-		menu.settingsBut = 1;
-	}
+	
 	// to exit
-	else if (mousepos.x >= 427 && mousepos.x <= 760 && mousepos.y >= 539 && mousepos.y <= 672) {
+	else if (mousepos.x >= 465 && mousepos.x <= 735 && mousepos.y >= 431 && mousepos.y <= 540) {
 		menu.exitBut = 1;
 	}
 }
-void checkMusic(Vector2i musicposition) {
-	// to press mute
-	if (musicposition.x >= 802 && musicposition.x <= 898 && musicposition.y >= 200 && musicposition.y <= 300) {
-		settings.muteBut = 0;
-	}
-	// to press unmute
-	else if (musicposition.x >= 700 && musicposition.x <= 800 && musicposition.y >= 0 && musicposition.y <= 600) {
-		settings.muteBut = 1;
-	}
-	//to press done
-	else if (musicposition.x >= 100 && musicposition.x <= 1000 && musicposition.y >= 0 && musicposition.y <= 800) {
-		settings.doneBut = 1;
-	}
-}
+
 bool checkground() {
 	if (mario.playersprite.getGlobalBounds().intersects(rec1.getGlobalBounds()))
 		return 1;
