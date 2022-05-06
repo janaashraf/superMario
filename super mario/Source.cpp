@@ -74,6 +74,15 @@ int main() {
 	bool dead = false;
 	gameOver.setString("GAME OVER!");
 	gameOver.setFillColor(Color::Black);
+	//level completed font
+	Font levelcompletedfont;
+	Text lvl_completed;
+	levelcompletedfont.loadFromFile("PressStart2P-Regular.ttf");
+	lvl_completed.setFont(levelcompletedfont);
+	lvl_completed.setString("Level Completed");
+	lvl_completed.setCharacterSize(55);
+	lvl_completed.setPosition(9100, 300);
+	lvl_completed.setFillColor(Color::White);
 
 	//mario character
 	mario.playertex.loadFromFile("mario sheet.png");
@@ -465,12 +474,22 @@ int main() {
 			}
 			mario.playersprite.move(0, -vy);
 			if (dead)
+				if (mario.playersprite.getPosition().x < 9770)
 				window.draw(gameOver);
 
 		}
 
 		else if (menu.exitBut == 1) {
 			window.close();
+		}
+		if (mario.playersprite.getPosition().x >= 9770)
+		{
+			window.draw(lvl_completed);
+			mario.playersprite.setScale(0, 0);
+			window.draw(text);
+			text.setPosition(9200, 200);
+			text.setCharacterSize(60);
+			text.setFillColor(Color::White);
 		}
 		else if (menu.infoBut == 1) {
 			window.draw(menu.infoSprite);
