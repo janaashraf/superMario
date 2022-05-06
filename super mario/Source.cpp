@@ -14,7 +14,8 @@ RectangleShape rec3(Vector2f(3050, 100));
 RectangleShape rec4(Vector2f(3050, 100));
 
 void checkPos(Vector2i mousepos);
-
+void checkXPos(Vector2i Mousepos);
+void checkmusic(Vector2i musicpos);
 bool checkground();
 //player struct
 struct player
@@ -37,9 +38,9 @@ struct top
 //menu struct
 struct gameMenu
 {
-	Sprite menuSprite;
-	Texture menutex;
-	int startBut = 0, exitBut = 0;
+	Sprite menuSprite, infoSprite;
+	Texture menutex, infotex;
+	int startBut = 0, exitBut = 0, infoBut = 0, XBut = 0, muteBut = 0;
 }menu;
 
 
@@ -222,10 +223,14 @@ int main() {
 
 
 	//menu
-	menu.menutex.loadFromFile("menu mario 3.png");
+	menu.menutex.loadFromFile("menu mario 6.png");
 	menu.menuSprite.setTexture(menu.menutex);
 	menu.menuSprite.setPosition(-20, -10);
 	menu.menuSprite.setScale(1.6, 1.5);
+	menu.infotex.loadFromFile("infomenu.png");
+	menu.infoSprite.setTexture(menu.infotex);
+	menu.infoSprite.setScale(1.25, 1.25);
+	menu.infoSprite.setPosition(190, 30);
 	//other sprites
 	Texture mapTex;
 	Sprite map;
@@ -235,7 +240,8 @@ int main() {
 
 	//mario music
 	Music music;
-	music.openFromFile("mariomusic.ogg");
+	music.openFromFile("supermusic.ogg");
+	music.play();
 
 	//Camera
 	View camera(FloatRect(0, 0, 1200, 700));
@@ -251,7 +257,14 @@ int main() {
 		if (Mouse::isButtonPressed(Mouse::Left)) {
 			Vector2i pos = Mouse::getPosition(window);
 			checkPos(pos);
+			checkmusic(pos);
 		}
+		if (menu.infoBut == 1 && Mouse::isButtonPressed(Mouse::Left)) {
+			Vector2i xpos = Mouse::getPosition(window);
+			checkXPos(xpos);
+
+		}
+	
 
 		//Moving Right
 		if (Keyboard::isKeyPressed(Keyboard::Right))
@@ -436,7 +449,6 @@ int main() {
 		window.setView(camera);
 		window.clear();
 		window.draw(menu.menuSprite);
-		music.play();
 
 
 		if (menu.startBut == 1) {
@@ -460,6 +472,22 @@ int main() {
 		else if (menu.exitBut == 1) {
 			window.close();
 		}
+		else if (menu.infoBut == 1) {
+			window.draw(menu.infoSprite);
+			if (menu.XBut == 1) {
+				window.draw(menu.menuSprite);
+				menu.infoBut = 0;
+				menu.XBut = 0;
+			}
+		}
+		if (menu.muteBut == 1)
+			music.pause();
+		else if (menu.muteBut == 0) {
+			music.pause();
+			music.play();
+		}
+
+
 
 		window.display();
 	}
@@ -473,9 +501,26 @@ void checkPos(Vector2i mousepos) {
 	}
 
 	// to exit
-	else if (mousepos.x >= 465 && mousepos.x <= 735 && mousepos.y >= 431 && mousepos.y <= 540) {
+	else if (mousepos.x >= 465 && mousepos.x <= 735 && mousepos.y >= 431 && mousepos.y <= 536) {
 		menu.exitBut = 1;
 	}
+	//to open info
+	else if (mousepos.x >= 465 && mousepos.x <= 742 && mousepos.y >= 537 && mousepos.y <= 623) {
+		menu.infoBut = 1;
+	}
+
+}
+// to check closing the info window
+void checkXPos(Vector2i Mousepos) {
+	if (Mousepos.x >= 893 && Mousepos.x <= 978 && Mousepos.y >= 27 && Mousepos.y <= 108)
+		menu.XBut = 1;
+}
+// to mute and unmute the music
+void checkmusic(Vector2i musicpos) {
+	if (musicpos.x >= 183 && musicpos.x <= 230 && musicpos.y >= 82 && musicpos.y <= 132 && menu.infoBut == 0)
+		menu.muteBut = 1;
+	else if (musicpos.x >= 269 && musicpos.x <= 322 && musicpos.y >= 82 && musicpos.y <= 136 && menu.infoBut == 0)
+		menu.muteBut = 0;
 }
 
 bool checkground() {
