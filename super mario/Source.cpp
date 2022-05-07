@@ -5,9 +5,17 @@
 #include <SFML/window.hpp>
 using namespace sf;
 using namespace std;
+//Camera
+View camera(FloatRect(0, 0, 1200, 700));
+//to check dead
+bool dead = false;
+Text gametime;
+//score text
+Text text;
 //jump
 bool grounded = false;
-int vy = 0;
+bool onBrick = false;
+int vy = 0, vx=0;
 RectangleShape rec1(Vector2f(3300, 100));
 RectangleShape rec2(Vector2f(675, 100));
 RectangleShape rec3(Vector2f(3050, 100));
@@ -17,6 +25,11 @@ void checkPos(Vector2i mousepos);
 void checkXPos(Vector2i Mousepos);
 void checkmusic(Vector2i musicpos);
 bool checkground();
+void MarioMovement();
+void setBricks(Sprite brick[44]);
+void checkBrickIntersection(Sprite brick[44], int brickSize_x, int brickSize_y,bool &ground);
+void displayStones(Sprite brick[44], int i);
+void displayStones(Sprite brick[44], RenderWindow& window);
 //player struct
 struct player
 {
@@ -43,13 +56,19 @@ struct gameMenu
 	int startBut = 0, exitBut = 0, infoBut = 0, XBut = 0, muteBut = 0;
 }menu;
 
-
 // coins struct
 struct marioCoin {
 	Sprite coinSprite;
 	Texture coinTex;
 	int coinIndicator = 0;
 } coins[100];
+
+//Bricks
+Texture bricksTexture;
+Sprite brick[44];
+int brick_collisionTimes[44] = {};
+bool intersectedSide = false;
+bool intersected = false;
 //main function
 int main() {
 
@@ -57,14 +76,21 @@ int main() {
 	window.setFramerateLimit(15);
 	//score text
 	int score = 0;
-	Font font;
-	font.loadFromFile("PressStart2P-Regular.ttf");
-	Text text;
-	text.setFont(font);
+	Font textfont;
+	textfont.loadFromFile("PressStart2P-Regular.ttf");
+	text.setFont(textfont);
 	text.setFillColor(Color::Black);
 	text.setString("score : " + to_string(score));
 	text.setPosition(30, 15);
 	text.setCharacterSize(20);
+	//timer text
+	int timer = 100;
+	int counter = 1300;
+	gametime.setFont(textfont);
+	gametime.setFillColor(Color::Black);
+	gametime.setString("time  : " + to_string(timer));
+	gametime.setPosition(30, 45);
+	gametime.setCharacterSize(20);
 	//gameover text
 	Text gameOver;
 	Font gameOverFont;
@@ -90,6 +116,11 @@ int main() {
 	mario.playersprite.setTextureRect(IntRect(1 * 45, 2 * 64, 45, 64));
 	mario.playersprite.setScale(1.5, 1.5);
 	mario.playersprite.setPosition(300, 535);
+	//bricks
+	bricksTexture.loadFromFile("fixed-brick.png");
+	setBricks(brick);
+	int brickSize_x = brick[0].getTexture()->getSize().x * brick[0].getScale().x;
+	int brickSize_y = brick[0].getTexture()->getSize().y * brick[0].getScale().y;
 	//enemy character
 	int checkbarrier1 = 1;
 	int checkbarrier2 = 1;
@@ -252,8 +283,7 @@ int main() {
 	music.openFromFile("supermusic.ogg");
 	music.play();
 
-	//Camera
-	View camera(FloatRect(0, 0, 1200, 700));
+
 
 	while (window.isOpen())
 	{
@@ -273,72 +303,11 @@ int main() {
 			checkXPos(xpos);
 
 		}
-	
-
-		//Moving Right
-		if (Keyboard::isKeyPressed(Keyboard::Right))
-		{
-			if (mario.playersprite.getPosition().y < 580 && !dead) {
-				mario.playerDirection = 1;
-				if (mario.playersprite.getPosition().x < 540 || mario.playersprite.getPosition().x >= 9420 && mario.playersprite.getPosition().x < 9780)
-				{
-					mario.playersprite.move(15, 0);
-					mario.playerIndicator %= 4;
-					mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 2 * 64, 45, 64));
-					mario.playerIndicator++;
-				}
-				else if (mario.playersprite.getPosition().x == 9780)
-					mario.playersprite.setTextureRect(IntRect(1 * 45, 3 * 64, 45, 64));
-				else
-				{
-					mario.playersprite.move(15, 0);
-					camera.move(15, 0);
-					text.move(15, 0);
-					mario.playerIndicator++;
-					mario.playerIndicator %= 4;
-					mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 2 * 64, 45, 64));
-				}
-			}
-		}
-		//Moving Left 
-		else if (Keyboard::isKeyPressed(Keyboard::Left))
-		{
-			if (mario.playersprite.getPosition().y < 580 && !dead) {
-				mario.playerDirection = -1;
-				if ((mario.playersprite.getPosition().x > 100 && mario.playersprite.getPosition().x <= 540) || (mario.playersprite.getPosition().x <= 9780 && mario.playersprite.getPosition().x > 9420))
-				{
-					mario.playersprite.move(-15, 0);
-					mario.playerIndicator++;
-					mario.playerIndicator %= 4;
-					mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 1 * 64, 45, 64));
-				}
-				else if (mario.playersprite.getPosition().x <= 100)
-					mario.playersprite.setTextureRect(IntRect(1 * 45, 1 * 64, 45, 64));
-				else
-				{
-					mario.playerIndicator++;
-					mario.playerIndicator %= 4;
-					mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 1 * 64, 45, 64));
-					camera.move(-15, 0);
-					text.move(-15, 0);
-					mario.playersprite.move(-15, 0);
-
-
-				}
-			}
-		}
-		else
-		{
-			if (mario.playersprite.getPosition().x == 9780)
-				mario.playersprite.setTextureRect(IntRect(1 * 45, 3 * 64, 45, 64));
-			else
-			{
-				if (mario.playerDirection == 1)
-					mario.playersprite.setTextureRect(IntRect(1 * 45, 2 * 64, 45, 64));
-				else if (mario.playerDirection == -1)
-					mario.playersprite.setTextureRect(IntRect(1 * 45, 1 * 64, 45, 64));
-			}
-		}
+		
+		//mario movement
+		MarioMovement();
+		//check intersection with bricks
+		checkBrickIntersection(brick, brickSize_x, brickSize_y,onBrick);
 		//enemy moving
 		for (int i = 0; i < 12; i++) {
 			if (i == 4 && !enemystate[i]) {
@@ -392,7 +361,7 @@ int main() {
 					enemycollision[2 * i + 1].enemytop.move(3, 0);
 				}
 			}
-			else {
+			else if(!enemystate[i]) {
 				enemy[i].enemySprite.move(-3, 0);
 				enemycollision[2 * i].enemytop.move(-3, 0);
 				enemycollision[2 * i + 1].enemytop.move(-3, 0);
@@ -420,11 +389,18 @@ int main() {
 
 		//jump
 		if (checkground()) {
+			
+				mario.playersprite.setPosition(mario.playersprite.getPosition().x, 535);
+			
 			grounded = true;
 			vy = 0;
 			if (Keyboard::isKeyPressed(Keyboard::Space)) {
-				vy = 35;
+				vy = 45;
 			}
+
+		}
+		else if (onBrick) {
+			vy = 0;
 		}
 		else {
 			grounded = false;
@@ -463,7 +439,35 @@ int main() {
 		if (menu.startBut == 1) {
 			window.draw(map);
 			window.draw(mario.playersprite);
+			displayStones(brick, window);
 			window.draw(text);
+			//timeeeer
+			if (counter >= 0) {
+				counter--;
+				if (counter % 15 == 0 && timer>=0) {
+					gametime.setString("time  : " + to_string(timer));
+					timer--;
+					if (timer == 0) {
+						if (score > 100 && mario.playersprite.getPosition().x >= 9770) {
+							lvl_completed.setPosition(9100, 300);
+							window.draw(lvl_completed);
+							mario.playersprite.setScale(0, 0);
+							window.draw(text);
+							text.setPosition(9200, 200);
+							text.setCharacterSize(60);
+							text.setFillColor(Color::White);
+						}
+						else {
+							gameOver.setPosition(mario.playersprite.getPosition().x - 160, 400);
+							window.draw(gameOver);
+							mario.playersprite.setScale(0, 0);
+							dead = true;
+
+						}
+					}
+				}
+			}
+			window.draw(gametime);
 			for (int i = 0; i < 12; i++) {
 				window.draw(enemy[i].enemySprite);
 			}
@@ -475,7 +479,7 @@ int main() {
 			mario.playersprite.move(0, -vy);
 			if (dead)
 				if (mario.playersprite.getPosition().x < 9770)
-				window.draw(gameOver);
+					window.draw(gameOver);
 
 		}
 
@@ -541,8 +545,217 @@ void checkmusic(Vector2i musicpos) {
 	else if (musicpos.x >= 269 && musicpos.x <= 322 && musicpos.y >= 82 && musicpos.y <= 136 && menu.infoBut == 0)
 		menu.muteBut = 0;
 }
+void MarioMovement() {
+	//Moving Right
+	if (Keyboard::isKeyPressed(Keyboard::Right))
+	{
+		if (mario.playersprite.getPosition().y < 580 && !dead) {
+			mario.playerDirection = 1;
+			vx = 15;
+			if (mario.playersprite.getPosition().x < 540 || mario.playersprite.getPosition().x >= 9420 && mario.playersprite.getPosition().x < 9780)
+			{
+				mario.playersprite.move(vx, 0);
+				mario.playerIndicator %= 4;
+				mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 2 * 64, 45, 64));
+				mario.playerIndicator++;
+			}
+			else if (mario.playersprite.getPosition().x == 9780)
+				mario.playersprite.setTextureRect(IntRect(1 * 45, 3 * 64, 45, 64));
+			else
+			{
+				mario.playersprite.move(vx, 0);
+				camera.move(vx, 0);
+				text.move(vx, 0);
+				gametime.move(vx, 0);
+				mario.playerIndicator++;
+				mario.playerIndicator %= 4;
+				mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 2 * 64, 45, 64));
+			}
+		}
+	}
+	//Moving Left 
+	else if (Keyboard::isKeyPressed(Keyboard::Left))
+	{
+		if (mario.playersprite.getPosition().y < 580 && !dead) {
+			mario.playerDirection = -1;
+			vx = -15;
+			if ((mario.playersprite.getPosition().x > 100 && mario.playersprite.getPosition().x <= 540) || (mario.playersprite.getPosition().x <= 9780 && mario.playersprite.getPosition().x > 9420))
+			{
+				mario.playersprite.move(vx, 0);
+				mario.playerIndicator++;
+				mario.playerIndicator %= 4;
+				mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 1 * 64, 45, 64));
+			}
+			else if (mario.playersprite.getPosition().x <= 100)
+				mario.playersprite.setTextureRect(IntRect(1 * 45, 1 * 64, 45, 64));
+			else
+			{
+				mario.playerIndicator++;
+				mario.playerIndicator %= 4;
+				mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 1 * 64, 45, 64));
+				camera.move(vx, 0);
+				text.move(vx, 0);
+				gametime.move(vx, 0);
+				mario.playersprite.move(vx, 0);
+
+
+			}
+		}
+	}
+	else
+	{
+		if (mario.playersprite.getPosition().x == 9780)
+			mario.playersprite.setTextureRect(IntRect(1 * 45, 3 * 64, 45, 64));
+		else
+		{
+			if (mario.playerDirection == 1)
+				mario.playersprite.setTextureRect(IntRect(1 * 45, 2 * 64, 45, 64));
+			else if (mario.playerDirection == -1)
+				mario.playersprite.setTextureRect(IntRect(1 * 45, 1 * 64, 45, 64));
+		}
+	}
+}
+void setBricks(Sprite brick[44]) {
+	for (int i = 0; i < 44; i++)
+	{
+		brick[i].setTexture(bricksTexture);
+		if (i == 0)
+			brick[i].setPosition(730 + ((i + 1) * 48), 432);
+		else if (i > 0 && i < 6)
+		{
+			brick[i].setScale(0.18, 0.3);
+			brick[i].setPosition(874 + ((i + 1) * 48), 432);
+		}
+		else if (i == 6)
+			brick[i].setPosition(730 + ((i + 1) * 48), 240);
+		else if (i >= 7 && i < 10)
+			brick[i].setPosition(3322 + ((i + 1) * 48), 432);
+		else if (i >= 10 && i < 18)
+			brick[i].setPosition(3322 + ((i + 1) * 48), 240);
+		else if (i >= 18 && i < 22)
+			brick[i].setPosition(3466 + ((i + 1) * 48), 240);
+		else if (i == 22)
+			brick[i].setPosition(3418 + ((i + 1) * 48), 432);
+		else if (i >= 23 && i < 25)
+			brick[i].setPosition(3658 + ((i + 1) * 48), 432);
+		else if (i == 25)
+			brick[i].setPosition(3855 + ((i + 1) * 48), 432);
+		else if (i == 26)
+			brick[i].setPosition(3951 + ((i + 1) * 48), 432);
+		else if (i == 27)
+			brick[i].setPosition(4047 + ((i + 1) * 48), 432);
+		else if (i == 28)
+			brick[i].setPosition(3855 + ((i + 1) * 48), 240);
+		else if (i == 29)
+			brick[i].setPosition(4234 + ((i + 1) * 48), 432);
+		else if (i >= 30 && i < 33)
+			brick[i].setPosition(4330 + ((i + 1) * 48), 240);
+		else if (i >= 33 && i < 37)
+			brick[i].setPosition(4522 + ((i + 1) * 48), 240);
+		else if (i >= 38 && i < 40)
+			brick[i].setPosition(4330 + ((i + 1) * 48), 432);
+		else if (i >= 40 && i < 44)
+			brick[i].setPosition(6106 + ((i + 1) * 48), 432);
+
+		if (i == 0 || i >= 6 && i < 44)
+			brick[i].setScale(0.18, 0.3);
+
+		if (i >= 25 && i <= 28)
+			brick[i].setScale(0.18, 0.3);
+	}
+}
+void checkBrickIntersection(Sprite brick[44], int brickSize_x, int brickSize_y,bool &ground) {
+	for (int i = 0; i < 44; i++)
+	{
+		ground = false;
+		if (mario.playersprite.getGlobalBounds().intersects(brick[i].getGlobalBounds()))
+		{
+			if (vy >= 35 && vy < 45)
+			{
+				mario.playersprite.setPosition(mario.playersprite.getPosition().x, brick[i].getPosition().y + brickSize_y);
+				vy = 0;
+				displayStones(brick, i);
+			}
+			if (vy < -5 && vy != -25 && vy != -30 && intersectedSide == false)
+			{
+				mario.playersprite.setPosition(mario.playersprite.getPosition().x, brick[i].getPosition().y - 90);
+				vy = 0;
+				ground = true;
+			
+				if (Keyboard::isKeyPressed(Keyboard::Space)) {
+					vy = 45;
+					ground = false;
+				}
+			}
+			else {
+				ground = false;
+			}
+			if (vy >= 25 && vy < 35 && vx == -15)
+			{
+				vy = 0;
+				mario.playersprite.setPosition(brick[i].getPosition().x + brickSize_x + 30, mario.playersprite.getPosition().y + 50);
+				intersectedSide = true;
+				camera.move(vx + 30, 0);
+			}
+			if (vy >= 25 && vy < 35 && vx == 15)
+			{
+				vy = 0;
+				mario.playersprite.setPosition(brick[i].getPosition().x - 98, mario.playersprite.getPosition().y + 50);
+				intersectedSide = true;
+				camera.move(vx - 30, 0);
+			}
+
+		}
+	}
+
+	if (vy == -20)
+	{
+		intersectedSide = false;
+		intersected = false;
+	}
+}
+void displayStones(Sprite brick[44], int i) {
+	if (!intersected)
+	{
+		if (i == 0 || i == 2 || i == 4 || i == 6 || i == 8 || i == 21 || i >= 34 && i <= 35 || i == 42)
+		{
+			brick_collisionTimes[i]++;
+			//Score++
+			intersected = true;
+			if (brick_collisionTimes[i] == 2)
+			{
+				brick[i].setScale(0.3, 0.3);
+				brick[i].setPosition(brick[i].getPosition().x - 10, brick[i].getPosition().y);
+			}
+		}
+		else if (i >= 25 && i <= 28)
+		{
+			brick_collisionTimes[i]++;
+			intersected = true;
+			if (brick_collisionTimes[i] == 2)
+			{
+				brick[i].setScale(0.3, 0.3);
+				brick[i].setPosition(brick[i].getPosition().x - 15, brick[i].getPosition().y);
+			}
+		}
+	}
+}
+void displayStones(Sprite brick[44], RenderWindow& window) {
+	for (int i = 0; i < 44; i++)
+	{
+		if (brick_collisionTimes[i] >= 2)
+			window.draw(brick[i]);
+	}
+}
 
 bool checkground() {
+	bool ground = false;
+	for (int i = 0; i < 44; i++)
+	{
+		if (mario.playersprite.getGlobalBounds().intersects(brick[i].getGlobalBounds()) && vy < -5 && vy != -25 && vy != -30 && intersectedSide == false)
+			ground = true;
+
+	}
 	if (mario.playersprite.getGlobalBounds().intersects(rec1.getGlobalBounds()))
 		return 1;
 	else if (mario.playersprite.getGlobalBounds().intersects(rec2.getGlobalBounds()))
@@ -550,6 +763,8 @@ bool checkground() {
 	else if (mario.playersprite.getGlobalBounds().intersects(rec3.getGlobalBounds()))
 		return 1;
 	else if (mario.playersprite.getGlobalBounds().intersects(rec4.getGlobalBounds()))
+		return 1;
+	else if (ground)
 		return 1;
 	else
 		return 0;
