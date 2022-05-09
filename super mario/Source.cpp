@@ -29,8 +29,8 @@ void checkmusic(Vector2i musicpos);
 bool checkground();
 void MarioMovement();
 void setBricks(Sprite brick[44]);
-void checkBrickIntersection(Sprite brick[44], int brickSize_x, int brickSize_y, bool &onBrick, int& score);
-void displayStones(Sprite brick[44], int i, int &score);
+void checkBrickIntersection(Sprite brick[44], int brickSize_x, int brickSize_y, bool& onBrick, int& score);
+void displayStones(Sprite brick[44], int i, int& score);
 void displayStones(Sprite brick[44], RenderWindow& window);
 //player struct
 struct player
@@ -229,6 +229,16 @@ int main() {
 	buffer.loadFromFile("mariocoin.ogg");
 	Sound sound;
 	sound.setBuffer(buffer);
+	//enemy collision sound
+	SoundBuffer enemybuffer;
+	enemybuffer.loadFromFile("enemysound.ogg");
+	Sound enemysound;
+	enemysound.setBuffer(enemybuffer);
+	//gameover sound
+	SoundBuffer gameoverbuffer;
+	gameoverbuffer.loadFromFile("gameover.ogg");
+	Sound gameoversound;
+	gameoversound.setBuffer(gameoverbuffer);
 
 	// coins 
 	coins->coinTex.loadFromFile("coinss.png");
@@ -295,6 +305,7 @@ int main() {
 	//mario music
 	Music music;
 	music.openFromFile("supermusic.ogg");
+	if(!dead)
 	music.play();
 
 	//bool to check if mario on brick
@@ -392,7 +403,7 @@ int main() {
 				bonus.setPosition(enemy[i].enemySprite.getPosition().x, enemy[i].enemySprite.getPosition().y - 80);
 				score += 10;
 				scoreText.setString("score : " + to_string(score));
-				sound.play();
+				enemysound.play();
 				vy = 0;
 			}
 			else if ((mario.playersprite.getGlobalBounds().intersects(enemycollision[2 * i].enemytop.getGlobalBounds()) || mario.playersprite.getGlobalBounds().intersects(enemycollision[2 * i + 1].enemytop.getGlobalBounds())) && !enemystate[i]) {
@@ -400,6 +411,7 @@ int main() {
 				mario.playersprite.move(0, 0);
 				gameOver.setPosition(mario.playersprite.getPosition().x - 450, mario.playersprite.getPosition().y - 100);
 				mario.playersprite.setScale(0, 0);
+
 			}
 		}
 
@@ -423,11 +435,13 @@ int main() {
 			else
 				vy -= 5;
 		}
-		
+
 		//gameover check
 		if (mario.playersprite.getPosition().y > 580) {
 			dead = true;
 			gameOver.setPosition(scoreText.getPosition().x + 100, scoreText.getPosition().y + 200);
+			music.stop();
+			gameoversound.play();
 		}
 		//coin animation
 		for (int i = 1; i < 100; i++) {
@@ -438,7 +452,7 @@ int main() {
 			if (mario.playersprite.getGlobalBounds().intersects(coins[i].coinSprite.getGlobalBounds())) {
 				bonus.setString("+1");
 				bonus.setFillColor(Color::Yellow);
-				bonus.setPosition(coins[i].coinSprite.getPosition().x, coins[i].coinSprite.getPosition().y-60);
+				bonus.setPosition(coins[i].coinSprite.getPosition().x, coins[i].coinSprite.getPosition().y - 60);
 				coins[i].coinSprite.setScale(0, 0);
 				score++;
 				scoreText.setString("score : " + to_string(score));
@@ -482,6 +496,8 @@ int main() {
 							window.draw(gameOver);
 							mario.playersprite.setScale(0, 0);
 							dead = true;
+							music.stop();
+							gameoversound.play();
 						}
 					}
 				}
@@ -510,7 +526,7 @@ int main() {
 			window.draw(lvl_completed);
 			lvl_completed.setPosition(9100, 200);
 			gametime.setString("time  : " + to_string(100 - timer));
-			gametime.setPosition(9600,300);
+			gametime.setPosition(9600, 300);
 			gametime.setCharacterSize(30);
 			mario.playersprite.setScale(0, 0);
 			window.draw(scoreText);
@@ -528,14 +544,16 @@ int main() {
 		}
 		if (menu.muteBut == 1)
 			music.pause();
-		else if (menu.muteBut == 0) {
+		else if (menu.muteBut == 0 && !dead) {
 			music.pause();
 			music.play();
 		}
+		else if (dead)
+			gameoversound.play();
 
 		window.display();
 
-		
+
 	}
 	return 0;
 }
@@ -687,7 +705,7 @@ void setBricks(Sprite brick[44]) {
 			brick[i].setScale(0.18, 0.3);
 	}
 }
-void checkBrickIntersection(Sprite brick[44], int brickSize_x, int brickSize_y, bool &onBrick, int &score) {
+void checkBrickIntersection(Sprite brick[44], int brickSize_x, int brickSize_y, bool& onBrick, int& score) {
 	bool x = false;
 	for (int i = 0; i < 44; i++)
 	{
@@ -742,23 +760,23 @@ void checkBrickIntersection(Sprite brick[44], int brickSize_x, int brickSize_y, 
 		onBrick = false;
 	}
 }
-void displayStones(Sprite brick[44], int i, int &score) {
+void displayStones(Sprite brick[44], int i, int& score) {
 	if (!intersected)
 	{
-		if (i == 0 || i == 2 || i == 4 || i == 6 || i == 8 || i == 21 || i >= 25 && i <= 28 || i >= 34 && i <= 35  || i == 42)
+		if (i == 0 || i == 2 || i == 4 || i == 6 || i == 8 || i == 21 || i >= 25 && i <= 28 || i >= 34 && i <= 35 || i == 42)
 		{
 			brick_collisionTimes[i]++;
 			bonus.setString("+5");
 			bonus.setFillColor(Color::Green);
 			bonus.setPosition(brick[i].getPosition().x, brick[i].getPosition().y - 30);
-			score+=5;
+			score += 5;
 			scoreText.setString("score : " + to_string(score));
 			intersected = true;
 			if (brick_collisionTimes[i] == 2 && i >= 25 && i <= 28)
 			{
 				brick[i].setScale(0.3, 0.3);
 				brick[i].setPosition(brick[i].getPosition().x - 15, brick[i].getPosition().y);
-				bonus.setPosition(brick[i].getPosition().x + 15 , brick[i].getPosition().y - 40);
+				bonus.setPosition(brick[i].getPosition().x + 15, brick[i].getPosition().y - 40);
 			}
 			else if (brick_collisionTimes[i] == 2)
 			{
