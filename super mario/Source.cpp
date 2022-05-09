@@ -508,12 +508,13 @@ int main() {
 		if (mario.playersprite.getPosition().x == 9780)
 		{
 			window.draw(lvl_completed);
+			lvl_completed.setPosition(9100, 200);
 			gametime.setString("time  : " + to_string(100 - timer));
 			gametime.setPosition(9600,300);
 			gametime.setCharacterSize(30);
 			mario.playersprite.setScale(0, 0);
 			window.draw(scoreText);
-			scoreText.setPosition(9100, 300);
+			scoreText.setPosition(9150, 300);
 			scoreText.setCharacterSize(30);
 			scoreText.setFillColor(Color::Black);
 		}
