@@ -5,6 +5,7 @@
 #include <SFML/window.hpp>
 using namespace sf;
 using namespace std;
+bool level = false;
 //Camera
 View camera(FloatRect(0, 0, 1200, 700));
 //to check dead
@@ -88,7 +89,7 @@ int main() {
 
 	//timer text
 	int timer = 100;
-	int counter = 1515;
+	int counter = 1575;
 	gametime.setFont(scoreFont);
 	gametime.setFillColor(Color::Black);
 	gametime.setString("time  : " + to_string(timer));
@@ -229,16 +230,6 @@ int main() {
 	buffer.loadFromFile("mariocoin.ogg");
 	Sound sound;
 	sound.setBuffer(buffer);
-	//enemy collision sound
-	SoundBuffer enemybuffer;
-	enemybuffer.loadFromFile("enemysound.ogg");
-	Sound enemysound;
-	enemysound.setBuffer(enemybuffer);
-	//gameover sound
-	SoundBuffer gameoverbuffer;
-	gameoverbuffer.loadFromFile("gameover.ogg");
-	Sound gameoversound;
-	gameoversound.setBuffer(gameoverbuffer);
 
 	// coins 
 	coins->coinTex.loadFromFile("coinss.png");
@@ -305,7 +296,6 @@ int main() {
 	//mario music
 	Music music;
 	music.openFromFile("supermusic.ogg");
-	if(!dead)
 	music.play();
 
 	//bool to check if mario on brick
@@ -332,6 +322,7 @@ int main() {
 
 		//mario movement
 		MarioMovement();
+		cout << mario.playersprite.getPosition().x << endl;
 		//check intersection with bricks
 		checkBrickIntersection(brick, brickSize_x, brickSize_y, onBrick, score);
 		//enemy moving
@@ -403,7 +394,7 @@ int main() {
 				bonus.setPosition(enemy[i].enemySprite.getPosition().x, enemy[i].enemySprite.getPosition().y - 80);
 				score += 10;
 				scoreText.setString("score : " + to_string(score));
-				enemysound.play();
+				sound.play();
 				vy = 0;
 			}
 			else if ((mario.playersprite.getGlobalBounds().intersects(enemycollision[2 * i].enemytop.getGlobalBounds()) || mario.playersprite.getGlobalBounds().intersects(enemycollision[2 * i + 1].enemytop.getGlobalBounds())) && !enemystate[i]) {
@@ -411,7 +402,6 @@ int main() {
 				mario.playersprite.move(0, 0);
 				gameOver.setPosition(mario.playersprite.getPosition().x - 450, mario.playersprite.getPosition().y - 100);
 				mario.playersprite.setScale(0, 0);
-
 			}
 		}
 
@@ -440,8 +430,6 @@ int main() {
 		if (mario.playersprite.getPosition().y > 580) {
 			dead = true;
 			gameOver.setPosition(scoreText.getPosition().x + 100, scoreText.getPosition().y + 200);
-			music.stop();
-			gameoversound.play();
 		}
 		//coin animation
 		for (int i = 1; i < 100; i++) {
@@ -477,10 +465,14 @@ int main() {
 			window.draw(scoreText);
 			//timer
 			if (counter >= 0) {
-				counter--;
-				if (counter % 15 == 0 && timer >= 0 && mario.playersprite.getPosition().x < 9770) {
-					gametime.setString("time  : " + to_string(timer));
-					timer--;
+				if (counter > 0)
+					counter--;
+				if (counter % 15 == 0 && timer >= 0) {
+					if (!(score >= 100 && mario.playersprite.getPosition().x >= 9770)) {
+						gametime.setString("time  : " + to_string(timer));
+						if (timer > 0)
+							timer--;
+					}
 					if (timer == 0) {
 						if (score > 100 && mario.playersprite.getPosition().x >= 9770) {
 							lvl_completed.setPosition(9100, 100);
@@ -490,14 +482,15 @@ int main() {
 							scoreText.setPosition(9200, 260);
 							scoreText.setCharacterSize(60);
 							scoreText.setFillColor(Color::Black);
+
+							dead = false;
 						}
 						else {
-							gameOver.setPosition(mario.playersprite.getPosition().x - 160, 300);
+							gameOver.setPosition(mario.playersprite.getPosition().x - 660, 300);
 							window.draw(gameOver);
-							mario.playersprite.setScale(0, 0);
+							//mario.playersprite.setScale(0, 0);
+
 							dead = true;
-							music.stop();
-							gameoversound.play();
 						}
 					}
 				}
@@ -512,16 +505,17 @@ int main() {
 				}
 			}
 			mario.playersprite.move(0, -vy);
-			if (dead)
+			if (dead == true) {
 				if (mario.playersprite.getPosition().x < 9770)
 					window.draw(gameOver);
+			}
 
 		}
 
 		else if (menu.exitBut == 1) {
 			window.close();
 		}
-		if (mario.playersprite.getPosition().x == 9780)
+		if (mario.playersprite.getPosition().x >= 9754 && mario.playersprite.getPosition().x <= 9814 && score >= 100)
 		{
 			window.draw(lvl_completed);
 			lvl_completed.setPosition(9100, 200);
@@ -544,12 +538,10 @@ int main() {
 		}
 		if (menu.muteBut == 1)
 			music.pause();
-		else if (menu.muteBut == 0 && !dead) {
+		else if (menu.muteBut == 0) {
 			music.pause();
 			music.play();
 		}
-		else if (dead)
-			gameoversound.play();
 
 		window.display();
 
@@ -593,16 +585,16 @@ void MarioMovement() {
 		if (mario.playersprite.getPosition().y < 580 && !dead) {
 			mario.playerDirection = 1;
 			vx = 15;
-			if (mario.playersprite.getPosition().x < 540 || mario.playersprite.getPosition().x >= 9420 && mario.playersprite.getPosition().x < 9780)
+			if (mario.playersprite.getPosition().x < 540 || mario.playersprite.getPosition().x >= 9420 && mario.playersprite.getPosition().x < 9778)
 			{
 				mario.playersprite.move(vx, 0);
 				mario.playerIndicator %= 4;
 				mario.playersprite.setTextureRect(IntRect(mario.playerIndicator * 45, 2 * 64, 45, 64));
 				mario.playerIndicator++;
 			}
-			else if (mario.playersprite.getPosition().x == 9780)
+			else if (mario.playersprite.getPosition().x >= 9778 && mario.playersprite.getPosition().x <= 9785)
 				mario.playersprite.setTextureRect(IntRect(1 * 45, 3 * 64, 45, 64));
-			else
+			else if (mario.playersprite.getPosition().x < 9778)
 			{
 				mario.playersprite.move(vx, 0);
 				camera.move(vx, 0);
@@ -645,7 +637,7 @@ void MarioMovement() {
 	}
 	else
 	{
-		if (mario.playersprite.getPosition().x == 9780)
+		if (mario.playersprite.getPosition().x >= 9778 && mario.playersprite.getPosition().x <= 9785)
 			mario.playersprite.setTextureRect(IntRect(1 * 45, 3 * 64, 45, 64));
 		else
 		{
