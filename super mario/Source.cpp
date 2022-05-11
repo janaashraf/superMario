@@ -74,7 +74,6 @@ struct marioCoin {
 Texture bricksTexture;
 Sprite brick[44];
 int brick_collisionTimes[44] = {};
-bool intersectedSide = false;
 bool intersected = false;
 //main function
 int main() {
@@ -335,10 +334,10 @@ int main() {
 
 		//mario movement
 		MarioMovement();
-		
+
 		//check intersection with bricks
 		checkBrickIntersection(brick, brickSize_x, brickSize_y, onBrick, score);
-	//enemy moving
+		//enemy moving
 		if (menu.startBut == 1) {
 			for (int i = 0; i < 12; i++) {
 				if (i == 4 && !enemystate[i]) {
@@ -700,16 +699,16 @@ void setBricks(Sprite brick[44]) {
 			brick[i].setPosition(3322 + ((i + 1) * 48), 432);
 		else if (i >= 10 && i < 18)
 			brick[i].setPosition(3322 + ((i + 1) * 48), 240);
-		else if (i >= 18 && i < 22)
+		else if (i == 18 || i == 19 || i == 21)
 			brick[i].setPosition(3466 + ((i + 1) * 48), 240);
+		else if (i == 20)
+			brick[i].setPosition(3456 + ((i + 1) * 48), 240);
 		else if (i == 22)
 			brick[i].setPosition(3418 + ((i + 1) * 48), 432);
 		else if (i >= 23 && i < 25)
 			brick[i].setPosition(3658 + ((i + 1) * 48), 432);
 		else if (i == 25)
 			brick[i].setPosition(3855 + ((i + 1) * 48), 432);
-		else if (i == 26)
-			brick[i].setPosition(3951 + ((i + 1) * 48), 432);
 		else if (i == 27)
 			brick[i].setPosition(4047 + ((i + 1) * 48), 432);
 		else if (i == 28)
@@ -718,8 +717,14 @@ void setBricks(Sprite brick[44]) {
 			brick[i].setPosition(4234 + ((i + 1) * 48), 432);
 		else if (i >= 30 && i < 33)
 			brick[i].setPosition(4330 + ((i + 1) * 48), 240);
-		else if (i >= 33 && i < 37)
-			brick[i].setPosition(4522 + ((i + 1) * 48), 240);
+		else if (i == 33)
+			brick[i].setPosition(4512 + ((i + 1) * 48), 240);
+		else if (i == 34)
+			brick[i].setPosition(4512 + ((i + 1) * 48), 240);
+		else if (i == 35)
+			brick[i].setPosition(4517 + ((i + 1) * 48), 240);
+		else if (i == 36)
+			brick[i].setPosition(4532 + ((i + 1) * 48), 240);
 		else if (i >= 38 && i < 40)
 			brick[i].setPosition(4330 + ((i + 1) * 48), 432);
 		else if (i >= 40 && i < 44)
@@ -729,7 +734,12 @@ void setBricks(Sprite brick[44]) {
 			brick[i].setScale(0.18, 0.3);
 
 		if (i >= 25 && i <= 28)
-			brick[i].setScale(0.18, 0.3);
+		{
+			if (i == 26)
+				brick[i].setScale(0, 0);
+			else
+				brick[i].setScale(0.18, 0.3);
+		}
 	}
 }
 void checkBrickIntersection(Sprite brick[44], int brickSize_x, int brickSize_y, bool& onBrick, int& score) {
@@ -738,72 +748,59 @@ void checkBrickIntersection(Sprite brick[44], int brickSize_x, int brickSize_y, 
 	{
 		if (mario.playersprite.getGlobalBounds().intersects(brick[i].getGlobalBounds()))
 		{
-			x = true;
-			if (vy >= 35 && vy < 45)
-			{
-				mario.playersprite.setPosition(mario.playersprite.getPosition().x, brick[i].getPosition().y + brickSize_y);
-				vy = 0;
-				displayStones(brick, i, score);
-				x = false;
-			}
-			if (mario.playersprite.getPosition().y == brick[i].getPosition().y + brickSize_y)
-				x = false;
-
-			if (vy < -5 && vy != -25 && vy != -30 && intersectedSide == false)
+			if (mario.playersprite.getPosition().y < brick[i].getPosition().y - 80 && mario.playersprite.getPosition().x > brick[i].getPosition().x - 70 && mario.playersprite.getPosition().x < brick[i].getPosition().x + brickSize_x + 70 || vy < -45)
 			{
 				mario.playersprite.setPosition(mario.playersprite.getPosition().x, brick[i].getPosition().y - 90);
-				vy = 0;
+				x = true;
 				onBrick = true;
-				intersected = false; //created for counter of brick 
+				intersected = false;
 			}
-			if (vy >= 25 && vy < 35 && vx == -15)
+			if (vy >= 35 && vy < 45)
 			{
 				vy = 0;
-				mario.playersprite.setPosition(brick[i].getPosition().x + brickSize_x + 30, mario.playersprite.getPosition().y + 50);
-				intersectedSide = true;
-				camera.move(vx + 30, 0);
-				x = false;
+				mario.playersprite.setPosition(mario.playersprite.getPosition().x, brick[i].getPosition().y + brickSize_y);
+				displayStones(brick, i, score);
 			}
-			if (vy >= 25 && vy < 35 && vx == 15)
-			{
-				vy = 0;
-				mario.playersprite.setPosition(brick[i].getPosition().x - 98, mario.playersprite.getPosition().y + 50);
-				intersectedSide = true;
-				camera.move(vx - 30, 0);
-				x = false;
-			}
+			if (mario.playersprite.getPosition().y > brick[i].getPosition().y - 50 && mario.playersprite.getPosition().x > brick[i].getPosition().x - 80 && mario.playersprite.getPosition().x < brick[i].getPosition().x + brickSize_x + 80 && vy < 0)
+				mario.playersprite.setPosition(mario.playersprite.getPosition().x, brick[i].getPosition().y + 40);
 		}
-
 	}
 	if (x)
 		onBrick = true;
 	else
 		onBrick = false;
 
-	if (vy == -20)
-	{
-		intersectedSide = false;
+	if (vy < 0)
 		intersected = false;
-		onBrick = false;
-	}
 }
 void displayStones(Sprite brick[44], int i, int& score) {
 	if (!intersected)
 	{
-		if (i == 0 || i == 2 || i == 4 || i == 6 || i == 8 || i == 21 || i >= 25 && i <= 28 || i >= 34 && i <= 35 || i == 42)
+		if (i == 0 || i == 2 || i == 4 || i == 6 || i == 8 || i == 21 || i == 25 || i == 27 || i >= 34 && i <= 35 || i == 42)
 		{
 			brick_collisionTimes[i]++;
-			bonus.setString("+5");
-			bonus.setFillColor(Color::Green);
-			bonus.setPosition(brick[i].getPosition().x, brick[i].getPosition().y - 30);
-			score += 5;
-			scoreText.setString("score : " + to_string(score));
+			if (brick_collisionTimes[i] <= 2)
+			{
+				bonus.setString("+5");
+				bonus.setFillColor(Color::Green);
+				bonus.setPosition(brick[i].getPosition().x, brick[i].getPosition().y - 30);
+				score += 5;
+				scoreText.setString("score : " + to_string(score));
+			}
 			intersected = true;
-			if (brick_collisionTimes[i] == 2 && i >= 25 && i <= 28)
+			if (brick_collisionTimes[i] == 2 && (i == 25 || i == 27))
 			{
 				brick[i].setScale(0.3, 0.3);
 				brick[i].setPosition(brick[i].getPosition().x - 15, brick[i].getPosition().y);
 				bonus.setPosition(brick[i].getPosition().x + 15, brick[i].getPosition().y - 40);
+			}
+			else if (brick_collisionTimes[i] == 2 && (i == 34 || i == 35))
+			{
+				brick[i].setScale(0.3, 0.3);
+				if (i == 34)
+					brick[i].setPosition(brick[i].getPosition().x, brick[i].getPosition().y);
+				else
+					brick[i].setPosition(brick[i].getPosition().x - 5, brick[i].getPosition().y);
 			}
 			else if (brick_collisionTimes[i] == 2)
 			{
@@ -811,6 +808,7 @@ void displayStones(Sprite brick[44], int i, int& score) {
 				brick[i].setPosition(brick[i].getPosition().x - 10, brick[i].getPosition().y);
 				bonus.setPosition(brick[i].getPosition().x + 10, brick[i].getPosition().y - 40);
 			}
+
 		}
 	}
 }
@@ -822,13 +820,6 @@ void displayStones(Sprite brick[44], RenderWindow& window) {
 	}
 }
 bool checkground() {
-	bool ground = false;
-	for (int i = 0; i < 44; i++)
-	{
-		if (mario.playersprite.getGlobalBounds().intersects(brick[i].getGlobalBounds()) && vy < -5 && vy != -25 && vy != -30 && intersectedSide == false)
-			ground = true;
-
-	}
 	if (mario.playersprite.getGlobalBounds().intersects(rec1.getGlobalBounds()))
 		return 1;
 	else if (mario.playersprite.getGlobalBounds().intersects(rec2.getGlobalBounds()))
@@ -836,8 +827,6 @@ bool checkground() {
 	else if (mario.playersprite.getGlobalBounds().intersects(rec3.getGlobalBounds()))
 		return 1;
 	else if (mario.playersprite.getGlobalBounds().intersects(rec4.getGlobalBounds()))
-		return 1;
-	else if (ground)
 		return 1;
 	else
 		return 0;
