@@ -753,7 +753,7 @@ void checkBrickIntersection(Sprite brick[44], int brickSize_x, int brickSize_y, 
 				mario.playersprite.setPosition(mario.playersprite.getPosition().x, brick[i].getPosition().y - 90);
 				x = true;
 				onBrick = true;
-				intersected = false;
+				
 			}
 			if (vy >= 35 && vy < 45)
 			{
