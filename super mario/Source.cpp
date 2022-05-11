@@ -749,7 +749,7 @@ void checkBrickIntersection(Sprite brick[44], int brickSize_x, int brickSize_y, 
 	{
 		if (mario.playersprite.getGlobalBounds().intersects(brick[i].getGlobalBounds()))
 		{
-			if (mario.playersprite.getPosition().y < brick[i].getPosition().y - 80 && mario.playersprite.getPosition().x > brick[i].getPosition().x - 70 && mario.playersprite.getPosition().x < brick[i].getPosition().x + brickSize_x + 70 || vy < -45)
+			if (mario.playersprite.getPosition().y < brick[i].getPosition().y - 80 && mario.playersprite.getPosition().x > brick[i].getPosition().x - 70 && mario.playersprite.getPosition().x < brick[i].getPosition().x + brickSize_x + 70 || vy < -40)
 			{
 				mario.playersprite.setPosition(mario.playersprite.getPosition().x, brick[i].getPosition().y - 90);
 				x = true;
