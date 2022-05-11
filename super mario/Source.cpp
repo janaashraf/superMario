@@ -464,9 +464,7 @@ int main() {
 				coins[i].coinSprite.setScale(0, 0);
 				score++;
 				scoreText.setString("score : " + to_string(score));
-				if (menu.startBut == 1) {
-					sound.play();
-				}
+				
 			}
 		}
 
