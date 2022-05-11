@@ -338,7 +338,7 @@ int main() {
 		//check intersection with bricks
 		checkBrickIntersection(brick, brickSize_x, brickSize_y, onBrick, score);
 		//enemy moving
-		if (menu.startBut == 1) {
+		if (menu.startBut == 1 && !dead) {
 			for (int i = 0; i < 12; i++) {
 				if (i == 4 && !enemystate[i]) {
 					if (enemy[i].enemySprite.getGlobalBounds().intersects(barrier1.getGlobalBounds())) {
@@ -416,7 +416,7 @@ int main() {
 				music.stop();
 				gameovermusic.play();
 				mario.playersprite.move(0, 0);
-				gameOver.setPosition(mario.playersprite.getPosition().x - 450, mario.playersprite.getPosition().y - 100);
+				gameOver.setPosition(mario.playersprite.getPosition().x - 440, mario.playersprite.getPosition().y - 100);
 				mario.playersprite.setScale(0, 0);
 			}
 		}
@@ -448,6 +448,7 @@ int main() {
 			if (mario.playersprite.getScale().x > 0)
 				gameovermusic.play();
 			dead = true;
+			mario.playersprite.setScale(0, 0);
 			gameOver.setPosition(scoreText.getPosition().x + 100, scoreText.getPosition().y + 200);
 		}
 		//coin animation
@@ -536,7 +537,7 @@ int main() {
 								dead = true;
 							}
 							else
-								gameOver.setPosition(mario.playersprite.getPosition().x - 450, 200);
+								gameOver.setPosition(mario.playersprite.getPosition().x - 440, 200);
 							dead = true;
 						}
 					}
