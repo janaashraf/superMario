@@ -10,6 +10,9 @@ bool level = false;
 View camera(FloatRect(0, 0, 1200, 700));
 //to check dead
 bool dead = false;
+//to check level completed
+bool levelcom = false;
+//gametime
 Text gametime;
 //score text
 Text scoreText;
@@ -102,7 +105,6 @@ int main() {
 	gameOverFont.loadFromFile("PressStart2P-Regular.ttf");
 	gameOver.setFont(gameOverFont);
 	gameOver.setCharacterSize(100);
-	bool dead = false;
 	gameOver.setString("GAME OVER!");
 	gameOver.setFillColor(Color::Black);
 
@@ -226,10 +228,15 @@ int main() {
 	rec4.setPosition(7450, 630);
 
 	//coin collision sound
-	SoundBuffer buffer;
-	buffer.loadFromFile("mariocoin.ogg");
+	SoundBuffer coinbuffer;
+	coinbuffer.loadFromFile("mariocoin.ogg");
 	Sound sound;
-	sound.setBuffer(buffer);
+	sound.setBuffer(coinbuffer);
+	//enemy collision sound
+	SoundBuffer enemybuffer;
+	enemybuffer.loadFromFile("enemysound.ogg");
+	Sound enemysound;
+	enemysound.setBuffer(enemybuffer);
 
 	// coins 
 	coins->coinTex.loadFromFile("coinss.png");
@@ -297,7 +304,12 @@ int main() {
 	Music music;
 	music.openFromFile("supermusic.ogg");
 	music.play();
-
+	//gameover music
+	Music gameovermusic;
+	gameovermusic.openFromFile("gameover.ogg");
+	//levelcompleted music
+	Music levelcompletedmusic;
+	levelcompletedmusic.openFromFile("levelcompleted.ogg");
 	//bool to check if mario on brick
 	bool onBrick = false;
 
@@ -394,11 +406,13 @@ int main() {
 				bonus.setPosition(enemy[i].enemySprite.getPosition().x, enemy[i].enemySprite.getPosition().y - 80);
 				score += 10;
 				scoreText.setString("score : " + to_string(score));
-				sound.play();
+				enemysound.play();
 				vy = 0;
 			}
 			else if ((mario.playersprite.getGlobalBounds().intersects(enemycollision[2 * i].enemytop.getGlobalBounds()) || mario.playersprite.getGlobalBounds().intersects(enemycollision[2 * i + 1].enemytop.getGlobalBounds())) && !enemystate[i]) {
 				dead = true;
+				music.stop();
+				gameovermusic.play();
 				mario.playersprite.move(0, 0);
 				gameOver.setPosition(mario.playersprite.getPosition().x - 450, mario.playersprite.getPosition().y - 100);
 				mario.playersprite.setScale(0, 0);
@@ -428,6 +442,9 @@ int main() {
 
 		//gameover check
 		if (mario.playersprite.getPosition().y > 580) {
+			music.stop();
+			if(mario.playersprite.getScale().x>0)
+			gameovermusic.play();
 			dead = true;
 			gameOver.setPosition(scoreText.getPosition().x + 100, scoreText.getPosition().y + 200);
 		}
@@ -463,18 +480,43 @@ int main() {
 			displayStones(brick, window);
 			window.draw(bonus);
 			window.draw(scoreText);
+			if (mario.playersprite.getPosition().x >= 9754 && mario.playersprite.getPosition().x <= 9814 && score >= 100)
+			{
+				window.draw(lvl_completed);
+				if (mario.playersprite.getScale().x > 0) {
+					music.stop();
+					levelcompletedmusic.play();
+				}
+				levelcom = true;
+				lvl_completed.setPosition(9100, 200);
+				gametime.setString("time  : " + to_string(100 - timer));
+				gametime.setPosition(9600, 300);
+				gametime.setCharacterSize(30);
+				mario.playersprite.setScale(0, 0);
+				window.draw(scoreText);
+				scoreText.setPosition(9150, 300);
+				scoreText.setCharacterSize(30);
+				scoreText.setFillColor(Color::Black);
+				dead = false;
+			}
 			//timer
 			if (counter >= 0) {
 				if (counter > 0)
 					counter--;
 				if (counter % 15 == 0 && timer >= 0) {
 					if (!(score >= 100 && mario.playersprite.getPosition().x >= 9770)) {
-						gametime.setString("time  : " + to_string(timer));
-						if (timer > 0)
+						if(timer>0)
+						gametime.setString("time  : " + to_string(timer-1));
+						if (timer >= 0)
 							timer--;
 					}
 					if (timer == 0) {
 						if (score > 100 && mario.playersprite.getPosition().x >= 9770) {
+							levelcom = true;
+							if (mario.playersprite.getScale().x > 0) {
+								music.stop();
+								levelcompletedmusic.play();
+							}
 							lvl_completed.setPosition(9100, 100);
 							window.draw(lvl_completed);
 							mario.playersprite.setScale(0, 0);
@@ -482,14 +524,17 @@ int main() {
 							scoreText.setPosition(9200, 260);
 							scoreText.setCharacterSize(60);
 							scoreText.setFillColor(Color::Black);
-
 							dead = false;
 						}
 						else {
-							gameOver.setPosition(mario.playersprite.getPosition().x - 660, 300);
-							window.draw(gameOver);
-							//mario.playersprite.setScale(0, 0);
-
+							music.stop();
+							gameovermusic.play();
+							if (mario.playersprite.getPosition().x >= 9420 && mario.playersprite.getPosition().x < 9790) {
+								gameOver.setPosition(scoreText.getPosition().x + 50, 200);
+								dead = true;
+							}
+							else
+								gameOver.setPosition(mario.playersprite.getPosition().x - 450, 200);
 							dead = true;
 						}
 					}
@@ -506,7 +551,6 @@ int main() {
 			}
 			mario.playersprite.move(0, -vy);
 			if (dead == true) {
-				if (mario.playersprite.getPosition().x < 9770)
 					window.draw(gameOver);
 			}
 
@@ -514,19 +558,6 @@ int main() {
 
 		else if (menu.exitBut == 1) {
 			window.close();
-		}
-		if (mario.playersprite.getPosition().x >= 9754 && mario.playersprite.getPosition().x <= 9814 && score >= 100)
-		{
-			window.draw(lvl_completed);
-			lvl_completed.setPosition(9100, 200);
-			gametime.setString("time  : " + to_string(100 - timer));
-			gametime.setPosition(9600, 300);
-			gametime.setCharacterSize(30);
-			mario.playersprite.setScale(0, 0);
-			window.draw(scoreText);
-			scoreText.setPosition(9150, 300);
-			scoreText.setCharacterSize(30);
-			scoreText.setFillColor(Color::Black);
 		}
 		else if (menu.infoBut == 1) {
 			window.draw(menu.infoSprite);
@@ -538,7 +569,7 @@ int main() {
 		}
 		if (menu.muteBut == 1)
 			music.pause();
-		else if (menu.muteBut == 0) {
+		else if (menu.muteBut == 0 && !dead && !levelcom) {
 			music.pause();
 			music.play();
 		}
