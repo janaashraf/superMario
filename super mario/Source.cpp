@@ -10,6 +10,7 @@ bool level = false;
 View camera(FloatRect(0, 0, 1200, 700));
 //to check dead
 bool dead = false;
+bool timestop = false;
 //to check level completed
 bool levelcom = false;
 //gametime
@@ -334,66 +335,68 @@ int main() {
 
 		//mario movement
 		MarioMovement();
-		cout << mario.playersprite.getPosition().x << endl;
+		
 		//check intersection with bricks
 		checkBrickIntersection(brick, brickSize_x, brickSize_y, onBrick, score);
-		//enemy moving
-		for (int i = 0; i < 12; i++) {
-			if (i == 4 && !enemystate[i]) {
-				if (enemy[i].enemySprite.getGlobalBounds().intersects(barrier1.getGlobalBounds())) {
-					checkbarrier1 = 0;
+	//enemy moving
+		if (menu.startBut == 1) {
+			for (int i = 0; i < 12; i++) {
+				if (i == 4 && !enemystate[i]) {
+					if (enemy[i].enemySprite.getGlobalBounds().intersects(barrier1.getGlobalBounds())) {
+						checkbarrier1 = 0;
+					}
+					else if (enemy[i].enemySprite.getGlobalBounds().intersects(barrier2.getGlobalBounds())) {
+						checkbarrier1 = 1;
+					}
+					if (checkbarrier1 == 1) {
+						enemy[i].enemySprite.move(-3, 0);
+						enemycollision[2 * i].enemytop.move(-3, 0);
+						enemycollision[2 * i + 1].enemytop.move(-3, 0);
+					}
+					else {
+						enemy[i].enemySprite.move(3, 0);
+						enemycollision[2 * i].enemytop.move(3, 0);
+						enemycollision[2 * i + 1].enemytop.move(3, 0);
+					}
 				}
-				else if (enemy[i].enemySprite.getGlobalBounds().intersects(barrier2.getGlobalBounds())) {
-					checkbarrier1 = 1;
+				else if (i > 4 && i < 10 && !enemystate[i]) {
+					if (enemy[i].enemySprite.getGlobalBounds().intersects(barrier2.getGlobalBounds()))
+						checkbarrier2 = 0;
+					else if (enemy[i].enemySprite.getGlobalBounds().intersects(barrier3.getGlobalBounds()))
+						checkbarrier2 = 1;
+					if (checkbarrier2 == 1) {
+						enemy[i].enemySprite.move(-3, 0);
+						enemycollision[2 * i].enemytop.move(-3, 0);
+						enemycollision[2 * i + 1].enemytop.move(-3, 0);
+					}
+					else {
+						enemy[i].enemySprite.move(3, 0);
+						enemycollision[2 * i].enemytop.move(3, 0);
+						enemycollision[2 * i + 1].enemytop.move(3, 0);
+					}
 				}
-				if (checkbarrier1 == 1) {
+				else if (i > 9 && i < 12 && !enemystate[i])
+				{
+					if (enemy[i].enemySprite.getGlobalBounds().intersects(barrier3.getGlobalBounds()))
+						checkbarrier3 = 0;
+					else if (enemy[i].enemySprite.getGlobalBounds().intersects(barrier4.getGlobalBounds()))
+						checkbarrier3 = 1;
+					if (checkbarrier3 == 1) {
+						enemy[i].enemySprite.move(-3, 0);
+						enemycollision[2 * i].enemytop.move(-3, 0);
+						enemycollision[2 * i + 1].enemytop.move(-3, 0);
+					}
+					else {
+						enemy[i].enemySprite.move(3, 0);
+						enemycollision[2 * i].enemytop.move(3, 0);
+						enemycollision[2 * i + 1].enemytop.move(3, 0);
+					}
+				}
+				else if (!enemystate[i]) {
 					enemy[i].enemySprite.move(-3, 0);
 					enemycollision[2 * i].enemytop.move(-3, 0);
 					enemycollision[2 * i + 1].enemytop.move(-3, 0);
 				}
-				else {
-					enemy[i].enemySprite.move(3, 0);
-					enemycollision[2 * i].enemytop.move(3, 0);
-					enemycollision[2 * i + 1].enemytop.move(3, 0);
-				}
-			}
-			else if (i > 4 && i < 10 && !enemystate[i]) {
-				if (enemy[i].enemySprite.getGlobalBounds().intersects(barrier2.getGlobalBounds()))
-					checkbarrier2 = 0;
-				else if (enemy[i].enemySprite.getGlobalBounds().intersects(barrier3.getGlobalBounds()))
-					checkbarrier2 = 1;
-				if (checkbarrier2 == 1) {
-					enemy[i].enemySprite.move(-3, 0);
-					enemycollision[2 * i].enemytop.move(-3, 0);
-					enemycollision[2 * i + 1].enemytop.move(-3, 0);
-				}
-				else {
-					enemy[i].enemySprite.move(3, 0);
-					enemycollision[2 * i].enemytop.move(3, 0);
-					enemycollision[2 * i + 1].enemytop.move(3, 0);
-				}
-			}
-			else if (i > 9 && i < 12 && !enemystate[i])
-			{
-				if (enemy[i].enemySprite.getGlobalBounds().intersects(barrier3.getGlobalBounds()))
-					checkbarrier3 = 0;
-				else if (enemy[i].enemySprite.getGlobalBounds().intersects(barrier4.getGlobalBounds()))
-					checkbarrier3 = 1;
-				if (checkbarrier3 == 1) {
-					enemy[i].enemySprite.move(-3, 0);
-					enemycollision[2 * i].enemytop.move(-3, 0);
-					enemycollision[2 * i + 1].enemytop.move(-3, 0);
-				}
-				else {
-					enemy[i].enemySprite.move(3, 0);
-					enemycollision[2 * i].enemytop.move(3, 0);
-					enemycollision[2 * i + 1].enemytop.move(3, 0);
-				}
-			}
-			else if (!enemystate[i]) {
-				enemy[i].enemySprite.move(-3, 0);
-				enemycollision[2 * i].enemytop.move(-3, 0);
-				enemycollision[2 * i + 1].enemytop.move(-3, 0);
 			}
 		}
 		//collision with enemies
@@ -443,8 +446,8 @@ int main() {
 		//gameover check
 		if (mario.playersprite.getPosition().y > 580) {
 			music.stop();
-			if(mario.playersprite.getScale().x>0)
-			gameovermusic.play();
+			if (mario.playersprite.getScale().x > 0)
+				gameovermusic.play();
 			dead = true;
 			gameOver.setPosition(scoreText.getPosition().x + 100, scoreText.getPosition().y + 200);
 		}
@@ -500,13 +503,13 @@ int main() {
 				dead = false;
 			}
 			//timer
-			if (counter >= 0) {
+			if (counter >= 0 && timestop == false) {
 				if (counter > 0)
 					counter--;
 				if (counter % 15 == 0 && timer >= 0) {
 					if (!(score >= 100 && mario.playersprite.getPosition().x >= 9770)) {
-						if(timer>0)
-						gametime.setString("time  : " + to_string(timer-1));
+						if (timer > 0)
+							gametime.setString("time  : " + to_string(timer - 1));
 						if (timer >= 0)
 							timer--;
 					}
@@ -551,7 +554,8 @@ int main() {
 			}
 			mario.playersprite.move(0, -vy);
 			if (dead == true) {
-					window.draw(gameOver);
+				window.draw(gameOver);
+				timestop = true;
 			}
 
 		}
